@@ -1,0 +1,113 @@
+
+<?php
+ use Phalcon\Tag as Tag; ?>
+
+<?php
+$auth = $this->session->get('auth');
+$userId = $auth['id'];
+$userName = $auth['name'];
+?>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active"><?php echo Tag::linkTo("groups/index", "Group") ?></li>
+
+                <?php
+                $groupMembers = GroupMember::find("member_id=$userId AND member_status='active'");
+                foreach ($groupMembers as $member) {
+                    $groupId = $member->group_id;
+                    $group = Groups::findFirst("group_id=$groupId");
+                    echo '<li>';
+                    echo Phalcon\Tag::linkTo("groups/access/" . $groupId, $group->group_name);
+                    echo '</li>';
+                }
+                ?>
+            </ul>
+            <?php
+            echo Tag::form(array(
+                "groups/search",
+                "method" => "post",
+                "onbeforesubmit" => "return false",
+            ));
+            ?>
+            <?php echo Tag::textField(array('group_name', 'placeholder' => 'Group Name', 'class' => 'form-control', 'style' => 'margin-bottom:10px;')); ?>
+            <?php echo Tag::submitButton(array("Search", 'class' => 'btn btn-sm btn-danger')) ?>
+            
+            <?php echo Tag::endForm(); ?>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <?php echo $this->getContent(); ?>
+
+            <div class="table-responsive">
+                <h2>Groups</h2>
+                <table class="table table-blue table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Group</th>
+                            <th>Owner</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $i = 1;
+                        if (isset($page)) {
+                            foreach ($page->items as $content) {
+                                $status = $content->member_status;
+                                ?>
+                                <tr>
+                                    <td><?php echo $i++ ?></td>
+                                    <td><?php echo $content->groups->group_name ?></td>
+                                    <td><?php echo $content->user_name ?></td>
+                                    <td>
+                                        <?php
+                                        if ($status == 'active')
+                                            echo "<span class=\"label label-success\">$status</span>";
+                                        elseif ($status == 'pending') {
+                                            echo "<span class=\"label label-warning\">$status</span>";
+                                        } elseif ($status == 'rejected') {
+                                            echo "<span class=\"label label-danger\">$status</span>";
+                                        }
+                                        ?>
+                                    </td>
+                                    <td class="center-container">
+                                        <?php
+                                        if ($status == null || $status == 'rejected')
+                                            echo $this->tag->linkTo(array("groups/join/" . $content->groups->group_id, "class" => "btn btn-success", '<span class="glyphicon glyphicon-edit"></span> Join'));
+                                        else
+                                            echo $this->tag->linkTo(array("groups/leave/" . $content->groups->group_id, "class" => "btn btn-danger", '<span class="glyphicon glyphicon-remove"></span> Leave'));
+                                        ?>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </tbody>
+                    <?php if (isset($page)) { ?>
+                        <tbody>
+                            <tr>
+                                <td colspan="9" align="right">
+                                    <table align="center">
+                                        <tr>
+
+                                            <td><?php echo $this->tag->linkTo(array("groups/search", '<span class="glyphicon glyphicon-fast-backward"></span> First', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                            <td><?php echo $this->tag->linkTo(array("groups/search?page=" . $page->before, '<span class="glyphicon glyphicon-chevron-left"></span> Previous', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                            <td><?php echo $this->tag->linkTo(array("groups/search?page=" . $page->next, 'Next <span class="glyphicon glyphicon-chevron-right"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                            <td><?php echo $this->tag->linkTo(array("groups/search?page=" . $page->last, 'Last <span class="glyphicon glyphicon-fast-forward"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                            <td><?php echo $page->current, "/", $page->total_pages ?></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        <tbody>
+                        <?php } ?>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

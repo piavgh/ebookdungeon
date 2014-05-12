@@ -1,0 +1,77 @@
+
+<?php
+ use Phalcon\Tag as Tag; ?>
+
+<?php
+$auth = $this->session->get('auth');
+$userId = $auth['id'];
+$userName = $auth['name'];
+?>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <?php $this->elements->getGroupSidebar($userId, $activeId); ?>
+            <?php
+            echo Tag::form(array(
+                "groups/search",
+                "method" => "post",
+                "onbeforesubmit" => "return false",
+            ));
+            ?>
+            <?php echo Tag::textField(array('group_name', 'placeholder' => 'Group Name', 'class' => 'form-control', 'style' => 'margin-bottom:10px;')); ?>
+            <?php echo Tag::submitButton(array("Search", 'class' => 'btn btn-sm btn-danger')) ?>
+
+            <?php echo Tag::endForm(); ?>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <?php echo $this->getContent(); ?>
+
+            <div class="table-responsive">
+                <h2>Group's contents</h2>
+                <table class="table table-blue table-bordered table-striped" align="center">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Owner Id</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Uploaded</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $i = 1;
+                        foreach ($page->items as $content) {
+                            ?>
+                            <tr>
+                                <td><?php echo $i++ ?></td>
+                                <td><?php echo $this->tag->linkTo(array("contents/show/" . $content->contents->content_id, $content->contents->content_name)) ?></td>
+                                <td><?php echo $content->user_name ?></td>
+                                <td><?php echo $content->contents->file_type ?></td>
+                                <td><?php echo Utils::formatFileSize($content->contents->content_size) ?></td>
+                                <td><?php echo $content->contents->uploaded ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                    <tbody>
+                        <tr>
+                            <td colspan="10" align="right">
+                                <table align="center">
+                                    <tr>
+                                        <td><?php echo $this->tag->linkTo(array("contents/index", '<span class="glyphicon glyphicon-fast-backward"></span> First', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->before, '<span class="glyphicon glyphicon-chevron-left"></span> Previous', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->next, 'Next <span class="glyphicon glyphicon-chevron-right"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->last, 'Last <span class="glyphicon glyphicon-fast-forward"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                                        <td><?php echo $page->current, "/", $page->total_pages ?></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    <tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

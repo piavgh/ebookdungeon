@@ -1,0 +1,129 @@
+<?php
+ use Phalcon\Tag as Tag; ?>
+
+<?php echo $this->getContent(); ?>
+
+<div align="center">
+    <div class="row">
+        <div class="col-md-7">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">User's information</h3>
+                </div>
+                <div class="panel-body info-group center-container">
+                    <?php
+                    echo Tag::form(array(
+                        "account/index",
+                        "class" => "form-horizontal",
+                        "method" => "post",
+                        "onbeforesubmit" => "return false"
+                    ));
+                    ?>
+                    <fieldset>
+                        <div class="control-group">
+                            <label class="control-label" for="email">Email*</label>
+                            <div class="controls">
+                                <?php echo Tag::textField(array("email", "class" => "form-control")); ?>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="first_name">First name</label>
+                            <div class="controls">
+                                <?php echo Tag::textField(array("firstname", "class" => "form-control")); ?>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="last_name">Last name</label>
+                            <div class="controls">
+                                <?php echo Tag::textField(array("lastname", "class" => "form-control")); ?>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="phone">Mobile Phone*</label>
+                            <div class="controls">
+                                <?php echo Tag::textField(array("mobilephone", "class" => "form-control")); ?>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="password">New Password</label>
+                            <div class="controls">
+                                <input type="password" class="form-control" name="newpassword">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label" for="password">Confirm Password</label>
+                            <div class="controls">
+                                <input type="password" class="form-control" name="confirmpassword">
+                            </div>
+                        </div>
+
+                        <div class="center-container">
+                            <?php
+                            echo Tag::submitButton(array(
+                                "Update",
+                                "class" => "btn btn-success ",
+                                "name" => "update_info"
+                            ));
+                            ?>
+                        </div>
+                    </fieldset>
+                    <?php echo Tag::endForm(); ?>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Group's information</h3>
+                </div>
+                <div class="panel-body info-group center-container">
+                    <?php if ($groupId > 0) { ?>
+                    <p><b>Group Name: </b><span class="label label-warning" style="font-size:1.0em;"><?php echo $groupName ?></span></p>
+                        <p><b>Number of members: </b><span class="badge"><?php echo $totalMembers ?></span></p>
+                        <p><b>Number of contents: </b><span class="badge"><?php echo $totalContents ?></span></p>
+                    <?php
+                    } else {
+                        echo Tag::form(array(
+                            "account/index",
+                            "class" => "form-horizontal",
+                            "method" => "post",
+                            "onbeforesubmit" => "return false"
+                        ));
+                        ?>
+                        <fieldset>
+                            <div class="control-group">
+                                <label class="control-label" for="group_name">Group name*</label>
+                                <div class="controls">
+    <?php echo Tag::textField(array("group_name", "class" => "form-control", "required" => true)); ?>
+                                </div>
+                            </div>
+
+                            <div class="center-container">
+                                <?php
+                                echo Tag::submitButton(array(
+                                    "Create group",
+                                    "class" => "btn btn-success ",
+                                    "name" => "create_group"
+                                ));
+                                ?>
+                            </div>
+                        </fieldset>
+                        <?php echo Tag::endForm();
+                    }
+                    ?>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

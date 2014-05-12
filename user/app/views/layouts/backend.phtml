@@ -1,0 +1,16 @@
+<!-- Static navbar -->
+<?php
+$auth = $this->session->get('auth');
+$groupId = $auth['group_id'];
+
+if ($groupId > 0) {
+    $this->elements->getGroupMenu();
+} else {
+    $this->elements->getIndividualMenu();
+}
+?>
+<div class="container">
+    <div align="center">
+        <?php echo $this->getContent(); ?>
+    </div>
+</div>

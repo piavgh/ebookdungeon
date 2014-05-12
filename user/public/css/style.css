@@ -1,0 +1,144 @@
+/*
+====================================================================
+ Copyright 2012 - 2014 Pacific NW Investments, Ltd. All Rights Reserved.
+
+ This software, in source or compiled form, is confidential and proprietary 
+ information and is protected by Canadian copyright laws and 
+ international treaty provisions. 
+
+ The intellectual and technical concepts contained herein are proprietary 
+ to Pacific NW Investments, Ltd. and may be covered by Canadian and
+ ForeignPatents, patents in process, and are protected by trade secret 
+ or copyright law.  Use and/or duplication, is forbidden without written permission 
+ from Pacific NW Investments, Ltd.
+====================================================================
+*/
+
+body {
+    background: url('/img/garden_background.jpg') 0% 0% repeat-x;
+}
+
+.footer {
+    padding-top: 40px;
+    padding-bottom: 40px;
+    margin-top: 40px;
+    border-top: 1px solid #eee;
+}
+
+#sign-in-row {min-height: 30px; padding-bottom: 10px;}
+#signin-container{
+    background-color: #000; 
+    color: #fff; 
+    padding: 10px 0 5px 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+#sign-in {text-align: right; font-weight: bold;}
+.btn-login{color:#e2ce1c;}
+
+/* Custom bootstrap */
+h2 {
+    font-size: 24px;
+    line-height: 26px;
+}
+
+.alert {padding: 8px 35px 8px 14px;}
+.alert-error {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+/*
+    Sign in form
+*/
+.form-signin {
+    max-width: 330px;
+    padding: 15px;
+}
+.form-horizontal {
+    padding: 15px;
+}
+.form-horizontal input, select{ max-width: 330px; }
+
+.form-signin .form-signin-heading,
+.form-horizontal .form-horizontal-heading,
+.form-signin .checkbox {
+    margin-bottom: 10px;
+}
+.form-signin .checkbox {
+    font-weight: normal;
+}
+.form-signin .form-control,
+.form-horizontal .form-control{
+    position: relative;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    font-size: 12px;
+}
+.form-signin .form-control:focus,
+.form-horizontal .form-control:focus{
+    z-index: 2;
+}
+.form-signin input[type="email"],
+.form-horizontal input[type="email"]{
+    margin-bottom: -1px;
+}
+.form-signin input[type="password"],
+.form-horizontal input[type="password"]{
+    margin-bottom: 10px;
+}
+
+#control-groupname{display: none;}
+
+.control-label{margin-top: 5px;}
+
+.form-horizontal .control-group {
+    margin-bottom: 18px;
+}
+.form-horizontal .control-label, .form-horizontal #registerBtn {
+    float: left;
+    width: 140px;
+    padding-top: 5px;
+    text-align: right;
+}
+.form-horizontal .controls {
+    margin-left: 160px;
+}
+
+.controls .alert, #sign-in-warning{display: none;}
+.warning{color:red;}
+
+.center-container{text-align: center;}
+
+/* Table style */
+.table-blue thead{
+    color: white;
+    background-color: #428bca;
+    border-color: #357ebd;
+}
+
+.table-custom > thead > tr > th, .table-custom > tbody > tr{text-align: center;}
+
+#map-canvas{width:100%; height:350px;}
+
+/* Upload style */
+#upall-btn, #cancelall-btn, #convert-checkbox{display:none;}
+.hidden-btn {display: none;}
+
+/* Group information */
+.info-group{text-align: left;}
+
+/* Used space */
+.account-space {
+    font-size:12px;
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: 400;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+}
+.account-space > span.info-space {font-size:14px;}
+.account-space > span.used-space {color:#1FA4E5;}

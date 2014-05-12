@@ -1,0 +1,95 @@
+<?php
+
+ use Phalcon\Tag as Tag; ?>
+<?php echo $this->getContent(); ?>
+
+<?php
+$view = $this->view->content;
+
+if ($view == 1) {
+    echo Tag::form(array(
+        "session/reset",
+        "method" => "post",
+        "class" => "form-signin",
+        "style" => "margin: 0 auto;",
+        "onbeforesubmit" => "return false"
+    ));
+    ?>
+    <p>Enter your email address below and we'll send you a link to reset your password.</p>
+
+    <?php
+    echo Tag::emailField(array(
+        'reset_email',
+        'id' => 'reset_email',
+        'class' => 'form-control',
+        'placeholder' => 'Email address',
+        'required' => true
+    ));
+    ?>
+
+    <p></p>
+    <button class="btn btn-default btn-primary" type="submit" value="reset_password">Reset Password</button>
+    <?php
+    echo Tag::linkTo(array(
+        "session/index",
+        "LogIn/Register",
+        "style" => "float:right; padding:5px;"));
+    ?>
+    <?php
+    echo Tag::endForm();
+} else {
+    echo Tag::form(array(
+        "session/resetpassword",
+        "method" => "post",
+        "class" => "form-signin",
+        "style" => "margin: 0 auto;",
+        "onbeforesubmit" => "return false",
+        "onsubmit" => "return Validate.validate_confirm_password('reset_password', 'confirm_reset_password', 'confirm_password_alert')"
+    ));
+    ?>
+    <h2 class="form-signin-heading">Reset Password</h2>
+    <p>Resetting password for <b><?php echo $this->view->email ?></b></p>
+
+    <?php echo Tag::hiddenField(array(
+        "reset_password_hash",
+        "value" => $this->view->hash
+    )); ?>
+    
+    <label class="control-label" for="reset_password">Password</label>
+    <?php
+    echo Tag::passwordField(array(
+        "reset_password",
+        "id" => "reset_password",
+        "class" => "form-control",
+        "placeholder" => "Password",
+        "required" => true
+    ));
+    ?>
+
+    <label class="control-label" for="confirm_reset_password">Confirm Password</label>
+    <div class="controls">
+        <?php
+        echo Tag::passwordField(array(
+            "confirm_reset_password",
+            "id" => "confirm_reset_password",
+            "class" => "form-control",
+            "placeholder" => "Confirm Password",
+            "required" => true
+        ));
+        ?>
+        <div class="alert" id="confirm_password_alert">
+            <strong class='warning'>Warning!</strong> Password does not match
+        </div>
+    </div>
+
+    <p></p>
+    <button class="btn btn-default btn-primary" type="submit" value="reset_password">Save</button>
+
+    <?php
+    echo Tag::endForm();
+}
+?>
+
+    <script type="text/javascript">
+        
+    </script>

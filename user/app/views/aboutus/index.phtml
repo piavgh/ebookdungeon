@@ -1,0 +1,25 @@
+<?php
+use Phalcon\Tag as Tag; ?>
+
+<div class="container">
+    <?php $this->elements->getLoginHeader(); ?>
+    <?php $this->elements->getNavMenu(); ?>
+
+    <!-- Jumbotron -->
+    <div class="jumbotron">
+        <h1>Ebook Dungeon</h1>
+        <p class="lead">Group 5 - ICT K55 - Hanoi University of Science and Technology</p>
+        <ul class="class="nav nav-pills nav-stacked"">
+        <p class="lead"">Members: </p>
+        <li class="list-group-item center-block" style="width: 40%">Tăng Thế Cường<span class="badge badge-success pull-right">20101226</span></li>
+        <li class="list-group-item center-block" style="width: 40%">Trịnh Huy Hoàng<span class="badge badge-success pull-right">20101586</span></li>
+        <li class="list-group-item center-block" style="width: 40%">Lê Hoàng Phương<span class="badge badge-success pull-right">20101999</span></li>
+        </ul>
+        <p><?php
+            echo Phalcon\Tag::linkTo(array("session",
+                "Sign up today",
+                "class" => "btn btn-lg btn-success"));
+            ?>
+        </p>
+    </div>
+</div>

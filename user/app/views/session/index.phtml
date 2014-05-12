@@ -1,0 +1,227 @@
+<?php
+
+ use Phalcon\Tag as Tag; ?>
+<?php echo $this->getContent(); ?>
+<div class="row">
+    <div class="col-md-4">
+        <?php
+        echo Tag::form(array(
+            "session/start",
+            "method" => "post",
+            "class" => "form-signin",
+            "onbeforesubmit" => "return false",
+            "onsubmit" => "return LogIn.validate()"
+        ));
+        ?>
+        <h2 class="form-signin-heading">Log in</h2>
+
+        <label for="user_name">User name</label>
+        <input type="text" id="sign-in-username" name="login_username" class="form-control" placeholder="User name" required autofocus>
+
+        <label for="password">Password</label>
+        <input type="password" id="sign-in-password" name="login_password" class="form-control" placeholder="Password" required>
+
+        <p class="warning" id="sign-in-warning">Please fill in both fields!</p>
+        <button class="btn btn-sm btn-primary" type="submit">Log in</button>
+        <?php echo Tag::linkTo(array(
+            "session/reset", 
+            "Reset Password",
+            "style" => "float:right; padding:5px;")); ?>
+        </form>
+    </div>
+
+    <div class="col-md-8">
+        <?php
+        echo Tag::form(array(
+            "session/register",
+            "method" => "post",
+            "class" => "form-horizontal",
+            "id" => "registerForm",
+            "onbeforesubmit" => "return false",
+            "onsubmit" => "return SignUp.validate()"
+        ));
+        ?>
+        <fieldset>
+            <h2 class="form-register-heading">Not Yet Registered?</h2>
+
+            <div class="control-group">
+                <label class="control-label" for="accounttype">Account type</label>
+                <div class="controls">
+                    <?php 
+                    echo Tag::selectStatic(array(
+                        "accounttype",
+                        "class" => "form-control",
+                        "onchange" => "Util.toggle_group_field(this)",
+                        array(
+                            "individual" => "Individual",
+                            "group" => "Group")))
+                            ?>
+                </div>
+            </div>
+
+            <div class="control-group" id="control-groupname">
+                <label class="control-label" for="groupname">Group name</label>
+                <div class="controls">
+                    <?php
+                    echo Tag::textField(array(
+                        "groupname",
+                        "id" => "groupname",
+                        "class" => "form-control",
+                        "placeholder" => "Group name"
+                    ));
+                    ?>
+                    <p class="help-block">(required)</p>
+                    <div class="alert" id="groupname_alert">
+                        <strong class='warning'>Warning!</strong> Please enter group's name
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="username">User name</label>
+                <div class="controls">
+                    <?php
+                    echo Tag::textField(array(
+                        "username",
+                        "id" => "username",
+                        "class" => "form-control",
+                        "placeholder" => "User name",
+                        "required" => true
+                    ));
+                    ?>
+
+                    <p class="help-block">(required)</p>
+                    <div class="alert" id="username_alert">
+                        <strong class='warning'>Warning!</strong> Please enter user name
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="email">Email</label>
+                <div class="controls">
+                    <?php
+                    echo Tag::emailField(array(
+                        "email",
+                        "id" => "email",
+                        "class" => "form-control",
+                        "placeholder" => "Email",
+                        "required" => true
+                    ));
+                    ?>
+                    <p class="help-block">(required)</p>
+                    <div class="alert" id="email_alert">
+                        <strong class='warning'>Warning!</strong> Please enter your email address
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="first_name">First name</label>
+                <div class="controls">
+                    <?php
+                    echo Tag::textField(array(
+                        "firstname",
+                        "class" => "form-control",
+                        "placeholder" => "First name"
+                    ));
+                    ?>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="last_name">Last name</label>
+                <div class="controls">
+                    <?php
+                    echo Tag::textField(array(
+                        "lastname",
+                        "class" => "form-control",
+                        "placeholder" => "Last name"
+                    ));
+                    ?>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="phone">Mobile Phone</label>
+                <div class="controls">
+                    <input type="tel" id="phone" class="form-control" name="mobilephone" placeholder="Mobile phone" required>
+                    <p class="help-block">(required)</p>
+                    <div class="alert" id="phone_alert">
+                        <strong class='warning'>Warning!</strong> Please enter your mobile number
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="password">Password</label>
+                <div class="controls">
+                    <?php
+                    echo Tag::passwordField(array(
+                        "password",
+                        "id" => "password",
+                        "class" => "form-control",
+                        "placeholder" => "Password",
+                        "required" => true
+                    ));
+                    ?>
+                    <p class="help-block">(required)</p>
+                    <div class="alert" id="password_alert">
+                        <strong class='warning'>Warning!</strong> Please enter your password
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label" for="password">Repeat Password</label>
+                <div class="controls">
+                    <?php
+                    echo Tag::passwordField(array(
+                        "repeat_password",
+                        "id" => "repeat_password",
+                        "class" => "form-control",
+                        "placeholder" => "Repeat Password",
+                        "required" => true
+                    ));
+                    ?>
+
+                    <p class="help-block">(required)</p>
+                    <div class="alert" id="repeat_password_alert">
+                        <strong class='warning'>Warning!</strong> Password does not match
+                    </div>
+                </div>
+            </div>
+
+            <div id="registerBtn">
+<?php
+echo Tag::submitButton(array(
+    "Register",
+    "class" => "btn btn-sm btn-primary",
+    "name" => "register_submit"
+));
+?>
+            </div>
+        </fieldset>
+        <?php echo Tag::endForm(); ?>
+
+    </div>
+</div>
+<script type="text/javascript">
+    /*
+     * Toggle group name
+     */
+    var elem = document.getElementById('accounttype');
+    var value = elem.options[elem.selectedIndex].value;
+    var group = $("#control-groupname");
+    if (value == "individual")
+    {
+        // Hide group field
+        $("#groupname").removeAttr('required');
+        group.hide();
+    } else if (value == "group")
+    {
+        // Show group 
+        $("#groupname").prop('required', true);
+        group.show();
+    }
+</script>
