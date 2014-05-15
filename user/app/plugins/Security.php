@@ -36,7 +36,7 @@ class Security extends Plugin
 
 			//Private area resources
 			$privateResources = array(
-				'contents' => array('index', 'search', 'delete','upload','show','edit', 'update', 'convert', 'action'),
+				'contents' => array('index', 'search', 'create', 'save', 'delete','upload','show','edit', 'update', 'convert', 'action'),
                                 'lobby' => array('index'),
                                 'groupadmin' => array('index','delete', 'active', 'reject'),
 				'groups' => array('index', 'join', 'access', 'leave', 'search'),
@@ -51,9 +51,7 @@ class Security extends Plugin
 				'index' => array('index'),
 				'aboutus' => array('index'),
 				'session' => array('index', 'register', 'start', 'end', 'verify', 'reset', 'resetpassword', 'verifymember'),
-				'products' => array('index'),
-                                'services' => array('index'),
-                                'contactus' => array('index', 'send'),
+                'contactus' => array('index', 'send')
 			);
 			foreach ($publicResources as $resource => $actions) {
 				$acl->addResource(new Phalcon\Acl\Resource($resource), $actions);

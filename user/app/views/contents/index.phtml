@@ -4,8 +4,12 @@ use Phalcon\Tag;
 
 <?php echo $this->getContent(); ?>
 
-<h1>Your E-books</h1>
+<h1>Your E-books</h1><br>
 
+<div class="pull-left">
+    <?php echo $this->tag->linkTo(array("contents/create", '<span class="glyphicon glyphicon-edit"></span> Create new document', "role" => "button", "class" => "btn btn-large btn-success")) ?>
+</div>
+<br><br>
 <?php
 echo Tag::form(array(
     "id" => "contentForm",

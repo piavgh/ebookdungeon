@@ -376,59 +376,17 @@ class ContentsController extends ControllerBase {
     }
 
     /**
-     * Creates a new content
+     * Creates a new document
      */
     public function createAction() {
 
-        if (!$this->request->isPost()) {
-            return $this->dispatcher->forward(array(
-                        "controller" => "contents",
-                        "action" => "index"
-            ));
-        }
+    }
 
-        $content = new Contents();
+    /**
+     * Save new document
+     */
+    public function saveAction() {
 
-        $content->owner_id = $this->request->getPost("owner_id");
-        $content->file_type = $this->request->getPost("file_type");
-        $content->path = $this->request->getPost("path");
-        $content->information = $this->request->getPost("information");
-        $content->content_name = $this->request->getPost("content_name");
-        $content->content_size = $this->request->getPost("content_size");
-        $content->content_extension = $this->request->getPost("content_extension");
-        $content->status = $this->request->getPost("status");
-        $content->created = $this->request->getPost("created");
-        $content->uploaded = $this->request->getPost("uploaded");
-
-
-        try {
-            if (!$content->save()) {
-                foreach ($content->getMessages() as $message) {
-                    $this->flash->error($message);
-
-                    // Logging
-                    $this->logger->error($message);
-                }
-
-                return $this->dispatcher->forward(array(
-                            "controller" => "contents",
-                            "action" => "new"
-                ));
-            }
-        } catch (Exception $ex) {
-            $this->logger->error('Create content exception: ' . $ex->getMessage());
-            return $this->dispatcher->forward(array(
-                        "controller" => "contents",
-                        "action" => "new"
-            ));
-        }
-
-        $this->flash->success("Content was created successfully");
-
-        return $this->dispatcher->forward(array(
-                    "controller" => "contents",
-                    "action" => "index"
-        ));
     }
 
     /**

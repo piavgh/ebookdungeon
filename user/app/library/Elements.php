@@ -9,16 +9,6 @@ use Phalcon\Tag as Tag;
 class Elements extends \Phalcon\Mvc\User\Component {
 
     private $_tabs = array(
-        'Products' => array(
-            'controller' => 'products',
-            'action' => 'index',
-            'any' => true
-        ),
-        'Services' => array(
-            'controller' => 'services',
-            'action' => 'index',
-            'any' => true
-        ),
         'My Account' => array(
             'controller' => 'session',
             'action' => 'index',
