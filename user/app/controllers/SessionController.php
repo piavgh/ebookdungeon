@@ -69,7 +69,7 @@ class SessionController extends ControllerBase {
                 $user->phone = $mobilephone;
                 $user->expiration = new Phalcon\Db\RawValue('now()');
                 $user->extra_time = 0;
-                $user->status = 'pending';
+                $user->status = 'active';
                 $user->maximum = new Phalcon\Db\RawValue('default');
                 $user->used = new Phalcon\Db\RawValue('default');
                 ;
@@ -111,13 +111,7 @@ class SessionController extends ControllerBase {
 
                         // Send mail if validation is passed
                         if ($validate == true) {
-
-                            if ($this->mail->sendVerificationMail($email, $username, $verification_hash))
-                                $this->flash->success('Thanks for sign-up! Please login your email to confirm the request');
-                            else {
-                                $this->logger->error("Error send register mail to: " . $email);
-                                $this->flash->error('Error occur, cannot send verification email. Contact us for the help!');
-                            }
+                            $this->flash->success('Thanks for sign-up! You can now log in!');
                         }
                     }
                 } catch (\Exception $ex) {
