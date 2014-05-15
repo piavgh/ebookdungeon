@@ -43,6 +43,11 @@ class Elements extends \Phalcon\Mvc\User\Component {
         )
     );
     private $_group_menu = array(
+        'My E-books' => array(
+            'controller' => 'contents',
+            'action' => 'index',
+            'any' => false
+        ),
         'Lobby' => array(
             'controller' => 'lobby',
             'action' => 'index',
@@ -50,11 +55,6 @@ class Elements extends \Phalcon\Mvc\User\Component {
         ),
         'Group Admin' => array(
             'controller' => 'groupadmin',
-            'action' => 'index',
-            'any' => false
-        ),
-        'Your E-books' => array(
-            'controller' => 'contents',
             'action' => 'index',
             'any' => false
         ),
