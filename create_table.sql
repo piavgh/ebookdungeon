@@ -82,15 +82,3 @@ CREATE TABLE `shared_contents` (
   CONSTRAINT `shared_contents_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `contents` (`content_id`),
   CONSTRAINT `shared_contents_ibfk_2` FOREIGN KEY (`group_id`) REFERENCES `groups` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `conversions` (
-  `convert_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `content_id` int(10) unsigned NOT NULL,
-  `convert_path` varchar(255) DEFAULT NULL,
-  `convert_mode` enum('schedule','instant') DEFAULT NULL,
-  `convert_datetime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `convert_status` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`convert_id`),
-  KEY `content_id` (`content_id`),
-  CONSTRAINT `conversion_ibfk_1` FOREIGN KEY (`content_id`) REFERENCES `contents` (`content_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;

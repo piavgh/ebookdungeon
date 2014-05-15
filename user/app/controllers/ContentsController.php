@@ -6,13 +6,6 @@ use Phalcon\Mvc\Model\Transaction\Failed as TxFailed;
 
 class ContentsController extends ControllerBase {
 
-    private function _instantConvert($userName) {
-        $command = "/var/www/mediacloud/conversion/instant_converter.sh \"{$userName}\"";
-
-        // Execute the shell command
-        shell_exec($command);
-    }
-
     private function _deleteContent($content_id = 0) {
         $auth = $this->session->get('auth');
         $userId = $auth['id'];
@@ -53,36 +46,6 @@ class ContentsController extends ControllerBase {
                         // Rollback the transaction
                         foreach ($sharedContent->getMesasges() as $m) {
                             $transaction->rollback($m->getMessage());
-                        }
-                    }
-                }
-            }
-
-            // Delete conversion contents
-            $conversions = Conversions::find("content_id=$content_id");
-            if ($conversions) {
-                foreach ($conversions as $conversion) {
-                    $conversion->setTransaction($transaction);
-                    if ($conversion->delete() == false) {
-
-                        $result = FALSE;
-                        // Rollback
-                        foreach ($conversion->getMessages() as $message) {
-                            $transaction->rollback($message->getMessage());
-                        }
-                    } else {
-                        // Delete physical converted file
-                        $convertpath = $conversion->convert_path;
-                        $deleteConverted = TRUE;
-                        if ($convertpath != null && is_file($convertpath)) {
-                            $deleteConverted = unlink($convertpath);
-                        }
-
-                        // Rollback
-                        if ($deleteConverted == FALSE) {
-                            $result = FALSE;
-                            $err = error_get_last();
-                            $transaction->rollback($err['message']);
                         }
                     }
                 }
@@ -631,25 +594,6 @@ class ContentsController extends ControllerBase {
                                     $this->logger->error("Save file upload error: " . (string) $m);
                                 }
                             } else {
-                                // Save to conversion table
-                                $conversion = new Conversions();
-                                $conversion->setTransaction($transaction);
-                                $conversion->content_id = $content->content_id;
-
-                                $conversion->convert_mode = 'instant';
-                                $conversion->convert_status = 0;
-                                $conversion->convert_datetime = '0000-00-00 00:00:00';
-
-                                if (!$conversion->save()) {
-                                    // Logging
-                                    $messages = $conversion->getMessages();
-                                    // Rollback
-                                    $transaction->rollback((string) $messages[0]);
-                                    foreach ($messages as $m) {
-                                        $errors[] = (string) $m;
-                                        $this->logger->error("Save conversion error: " . (string) $m);
-                                    }
-                                } else {
                                     // Update user account space info
                                     $user->used += $fileSize;
                                     $user->available -= $fileSize;
@@ -665,7 +609,6 @@ class ContentsController extends ControllerBase {
                                             $this->logger->error("Save account space info error: " . (string) $m);
                                         }
                                     }
-                                }
 
                                 // Success transaction
                                 $transaction->commit();
