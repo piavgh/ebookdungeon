@@ -61,9 +61,9 @@ echo Tag::form(array(
                     <?php
                     $status = $content->status;
                     if ($status == 'shared')
-                        echo "<span class=\"label label-success\">$status</span>";
+                        echo "<span class=\"label label-success\">Member Only</span>";
                     else
-                        echo "<span class=\"label label-warning\">$status</span>";
+                        echo "<span class=\"label label-warning\">Only Me</span>";
                     ?>
                 </td>
                 <td><?php echo $content->created ?></td>
@@ -140,7 +140,7 @@ echo Tag::form(array(
     <div class="col-lg-7" style="text-align: left;">
         <!-- The fileinput-button span is used to style the file input field as button -->
         <span class="btn btn-lg btn-success fileinput-button">
-            <i class="glyphicon glyphicon-plus"></i>
+            <i class="glyphicon glyphicon-open"></i>
             <span>Upload files...</span>
             <input type="file" name="files[]" multiple onchange="Upload.add_file(this)">
         </span>

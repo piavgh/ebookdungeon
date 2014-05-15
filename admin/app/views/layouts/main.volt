@@ -6,7 +6,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </a>
-            {{ link_to("index/index/", 'Mediacloud | Admin Control Panel', 'class' : 'brand') }}
+            {{ link_to("index/index/", 'E-book Dungeon | Admin Control Panel', 'class' : 'brand') }}
             {{ elements.getMenu() }}
         </div>
     </div>

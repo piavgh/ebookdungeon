@@ -19,7 +19,7 @@ class ControllerBase extends Phalcon\Mvc\Controller
 
     protected function initialize()
     {
-        Phalcon\Tag::prependTitle('Mediacloud | ');
+        Phalcon\Tag::prependTitle('E-book Dungeon | ');
     }
 
     protected function forward($uri){

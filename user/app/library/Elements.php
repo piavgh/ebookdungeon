@@ -26,7 +26,7 @@ class Elements extends \Phalcon\Mvc\User\Component {
         )
     );
     private $_menu = array(
-        'Contents' => array(
+        'Your E-books' => array(
             'controller' => 'contents',
             'action' => 'index',
             'any' => false
@@ -53,7 +53,7 @@ class Elements extends \Phalcon\Mvc\User\Component {
             'action' => 'index',
             'any' => false
         ),
-        'Contents' => array(
+        'Your E-books' => array(
             'controller' => 'contents',
             'action' => 'index',
             'any' => false
@@ -144,7 +144,7 @@ class Elements extends \Phalcon\Mvc\User\Component {
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="#">Media Cloud</a>
+                        <a class="navbar-brand" href="#">E-book Dungeon</a>
                     </div>
                     <div class="navbar-collapse collapse">
                         <ul class="nav navbar-nav">';

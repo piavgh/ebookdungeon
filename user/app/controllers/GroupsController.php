@@ -76,13 +76,6 @@ class GroupsController extends ControllerBase {
                         $this->logger->error("Join group error: " . $m);
                     }
                 } else {
-                    /*
-                     * Send joining request mail to group owner
-                     */
-                    if ($this->mail->sendJoinRequestMail($owner->email, $owner->first_name, $group->group_name, $userName, $userId, $group_id, $token) == FALSE) {
-                        $this->logger->error("Cannot send joining group request mail from user: <$userName> to group: <$group->group_name>");
-                    }
-
                     $this->flash->success("Joining request has been sent. Wait the approval of the admin!");
                 }
             } elseif ($member && $member->member_status == 'rejected') {
@@ -96,13 +89,6 @@ class GroupsController extends ControllerBase {
                         $this->logger->error("Join group error: " . $m);
                     }
                 } else {
-                    /*
-                     * Send joining request mail to group owner
-                     */
-                    if ($this->mail->sendJoinRequestMail($owner->email, $owner->first_name, $group->group_name, $userName, $userId, $group_id, $token) == FALSE) {
-                        $this->logger->error("Cannot send joining group request mail from user: <$userName> to group: <$group->group_name>");
-                    }
-                    
                     $this->flash->success("Joining request has been sent. Wait the approval of the admin!");
                 }
             }

@@ -8,8 +8,8 @@ class Mail extends \Phalcon\Mvc\User\Component {
     private function _getVerificationContent($username, $id) {
         $url = $this->config->url . 'session/verify?username=' . $username . '&id=' . $id;
         $content = '<!DOCTYPE html><html lang="en"><head><meta charset="utf_8" /><title>Verification mail</title></head><body>';
-        $content .= '<p>Dear Media Cloud Customer,</p>';
-        $content .= '<p>We have received a request to authorize this email address for use with Media Cloud.
+        $content .= '<p>Dear E-book Dungeon Customer,</p>';
+        $content .= '<p>We have received a request to authorize this email address for use with E-book Dungeon.
 		If you requested this verification, please go to the following URL to confirm that you are authorized to use this email address:</p>';
         $content .= '<p><a href="' . $url . '">' . $url . '</a></p>';
         $content .= '<p>Sincerely,</p>';
@@ -21,7 +21,7 @@ class Mail extends \Phalcon\Mvc\User\Component {
     private function _getResetPasswordContent($hash) {
         $url = $this->config->url . 'session/reset/' . $hash;
         $content = '<!DOCTYPE html><html lang="en"><head><meta charset="utf_8" /><title>Reset Password mail</title></head><body>';
-        $content .= '<p>Dear Media Cloud Customer,</p>';
+        $content .= '<p>Dear E-book Dungeon Customer,</p>';
         $content .= '<p>Someone (hopefully you) has requested a password reset for your Heroku account.  Follow the link below to set a new password:</p>';
         $content .= '<p><a href="' . $url . '">' . $url . '</a></p>';
         $content .= "<p>If you don't wish to reset your password, disregard this email and no action will be taken.</p>";
@@ -48,21 +48,21 @@ class Mail extends \Phalcon\Mvc\User\Component {
     }
 
     public function sendVerificationMail($to, $username, $id) {
-        $subject = "Media Cloud verification";
+        $subject = "E-book Dungeon verification";
         $message = $this->_getVerificationContent($username, $id);
 
         return $this->sendMail($to, $subject, $message);
     }
 
     public function sendResetPasswordMail($to, $hash) {
-        $subject = "Reset your Media Cloud password";
+        $subject = "Reset your E-book Dungeon password";
         $message = $this->_getResetPasswordContent($hash);
 
         return $this->sendMail($to, $subject, $message);
     }
 
     public function sendJoinRequestMail($to, $ownerName, $groupName, $userName, $memberId, $groupId, $token) {
-        $subject = "Media Cloud notification";
+        $subject = "E-book Dungeon notification";
         $message = $this->_getJoinGroupContent($ownerName, $groupName, $userName, $memberId, $groupId, $token);
         
         return $this->sendMail($to, $subject, $message);
