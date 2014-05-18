@@ -9,7 +9,7 @@ use Phalcon\Tag as Tag;
 class Elements extends \Phalcon\Mvc\User\Component {
 
     private $_tabs = array(
-        'My Account' => array(
+        'Log In/Register' => array(
             'controller' => 'session',
             'action' => 'index',
             'any' => true
@@ -26,7 +26,12 @@ class Elements extends \Phalcon\Mvc\User\Component {
         )
     );
     private $_menu = array(
-        'Your E-books' => array(
+        'Homepage' => array(
+            'controller' => 'index',
+            'action' => 'index',
+            'any' => false
+        ),
+        'My E-books' => array(
             'controller' => 'contents',
             'action' => 'index',
             'any' => false
@@ -43,6 +48,11 @@ class Elements extends \Phalcon\Mvc\User\Component {
         )
     );
     private $_group_menu = array(
+        'Homepage' => array(
+            'controller' => 'index',
+            'action' => 'index',
+            'any' => false
+        ),
         'My E-books' => array(
             'controller' => 'contents',
             'action' => 'index',
@@ -80,9 +90,13 @@ class Elements extends \Phalcon\Mvc\User\Component {
         echo '<div class="col-lg-4"></div><div class="col-lg-4"></div>';
         echo '<div class="col-lg-4" id="sign-in">' .
         '<span id="signin-container" class="btn-sm">' .
-        'Already a customer,' .
+        Phalcon\Tag::linkTo(array("index",
+            "Homepage",
+            "class" => "btn-sm btn-login")) .
+        '</span>' .
+        '<span id="signin-container" class="btn-sm">' .
         Phalcon\Tag::linkTo(array("session",
-            "log in",
+            "Login/Register",
             "class" => "btn-sm btn-login")) .
         '</span></div>';
         echo '</div>';

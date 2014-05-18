@@ -97,18 +97,18 @@ class ContentsController extends ControllerBase {
         $request = $this->request;
         if ($request->isPost()) {
             $contents = $request->getPost("content");
-            
+
             if ($request->hasPost("edit_content")) {
                 // Redirect to edit content page
                 if ($contents && count($contents) == 1) {
                     $content_id = $contents[0];
                     return $this->redirect("contents/edit/$content_id");
                 }
-                
+
             } elseif ($request->hasPost("delete_content")) {
                 // Redirect to delete content page
                 return $this->_deleteAction($contents);
-                
+
             } else {
                 return $this->dispatcher->forward(array(
                             "controller" => "contents",
@@ -168,15 +168,15 @@ class ContentsController extends ControllerBase {
             $availableSpace = intval($user->available);
             $percent = ($maxSpace != 0) ? round((($usedSpace / $maxSpace) * 100), 2) : 0;
         }
-        
+
         $this->view->setVar("maxSpace", $maxSpace);
         $this->view->setVar("usedSpace", $usedSpace);
         $this->view->setVar("availableSpace", $availableSpace);
         $this->view->setVar("percent", $percent);
-        
-        
+
+
         $dirPath = $this->config->upload_dir . $userName;
-        
+
         try {
             $numberPage = 1;
 
@@ -338,6 +338,72 @@ class ContentsController extends ControllerBase {
         }
     }
 
+    public function makecontentpublicAction($content_id = 0) {
+        try {
+            $content = Contents::findFirstBycontent_id($content_id);
+            if (!$content) {
+                $this->flash->error("content was not found");
+
+                return $this->dispatcher->forward(array(
+                    "controller" => "contents",
+                    "action" => "index"
+                ));
+            }
+
+            $content->status = 'public';
+            if (!$content->save()) {
+                $messages = $content->getMessages();
+                $this->flash->error((string) $messages[0]);
+                // Logging
+                foreach ($messages as $m) {
+                    $this->logger->error("Make content public error: " . (string) $m);
+                }
+                return $this->forward("contents/index");
+            }
+            $this->flash->success("This content is now public");
+            return $this->forward("contents/index");
+        } catch (Exception $e) {
+            $this->logger->error('Make content public exception: ' . $e->getMessage());
+            return $this->dispatcher->forward(array(
+                "controller" => "contents",
+                "action" => "index"
+            ));
+        }
+    }
+
+    public function makecontentprivateAction($content_id = 0) {
+        try {
+            $content = Contents::findFirstBycontent_id($content_id);
+            if (!$content) {
+                $this->flash->error("content was not found");
+
+                return $this->dispatcher->forward(array(
+                    "controller" => "contents",
+                    "action" => "index"
+                ));
+            }
+
+            $content->status = 'private';
+            if (!$content->save()) {
+                $messages = $content->getMessages();
+                $this->flash->error((string) $messages[0]);
+                // Logging
+                foreach ($messages as $m) {
+                    $this->logger->error("Make content private error: " . (string) $m);
+                }
+                return $this->forward("contents/index");
+            }
+            $this->flash->success("This content is now private");
+            return $this->forward("contents/index");
+        } catch (Exception $e) {
+            $this->logger->error('Make content public exception: ' . $e->getMessage());
+            return $this->dispatcher->forward(array(
+                "controller" => "contents",
+                "action" => "index"
+            ));
+        }
+    }
+
     /**
      * Creates a new document
      */
@@ -349,7 +415,96 @@ class ContentsController extends ControllerBase {
      * Save new document
      */
     public function saveAction() {
+        if (!$this->request->isPost()) {
+            return $this->dispatcher->forward(array(
+                "controller" => "contents",
+                "action" => "create"
+            ));
+        }
 
+        // Load the files we need:
+        require_once 'phpword/PHPWord.php';
+        require_once 'simplehtmldom/simple_html_dom.php';
+        require_once 'htmltodocx_converter/h2d_htmlconverter.php';
+        require_once 'example_files/styles.inc';
+
+// Functions to support this example.
+        require_once 'documentation/support_functions.inc';
+
+// HTML fragment we want to parse:
+        //$html = file_get_contents('example_files/example_html.html');
+        $html = $this->request->getPost("content");
+// $html = file_get_contents('test/table.html');
+
+// New Word Document:
+        $phpword_object = new PHPWord();
+        $section = $phpword_object->createSection();
+
+// HTML Dom object:
+        $html_dom = new simple_html_dom();
+        $html_dom->load('<html><body>' . $html . '</body></html>');
+// Note, we needed to nest the html in a couple of dummy elements.
+
+// Create the dom array of elements which we are going to work on:
+        $html_dom_array = $html_dom->find('html',0)->children();
+
+// We need this for setting base_root and base_path in the initial_state array
+// (below). We are using a function here (derived from Drupal) to create these
+// paths automatically - you may want to do something different in your
+// implementation. This function is in the included file
+// documentation/support_functions.inc.
+        $paths = htmltodocx_paths();
+
+// Provide some initial settings:
+        $initial_state = array(
+            // Required parameters:
+            'phpword_object' => &$phpword_object, // Must be passed by reference.
+            // 'base_root' => 'http://test.local', // Required for link elements - change it to your domain.
+            // 'base_path' => '/htmltodocx/documentation/', // Path from base_root to whatever url your links are relative to.
+            'base_root' => $paths['base_root'],
+            'base_path' => $paths['base_path'],
+            // Optional parameters - showing the defaults if you don't set anything:
+            'current_style' => array('size' => '11'), // The PHPWord style on the top element - may be inherited by descendent elements.
+            'parents' => array(0 => 'body'), // Our parent is body.
+            'list_depth' => 0, // This is the current depth of any current list.
+            'context' => 'section', // Possible values - section, footer or header.
+            'pseudo_list' => TRUE, // NOTE: Word lists not yet supported (TRUE is the only option at present).
+            'pseudo_list_indicator_font_name' => 'Wingdings', // Bullet indicator font.
+            'pseudo_list_indicator_font_size' => '7', // Bullet indicator size.
+            'pseudo_list_indicator_character' => 'l ', // Gives a circle bullet point with wingdings.
+            'table_allowed' => TRUE, // Note, if you are adding this html into a PHPWord table you should set this to FALSE: tables cannot be nested in PHPWord.
+            'treat_div_as_paragraph' => TRUE, // If set to TRUE, each new div will trigger a new line in the Word document.
+
+            // Optional - no default:
+            'style_sheet' => htmltodocx_styles_example(), // This is an array (the "style sheet") - returned by htmltodocx_styles_example() here (in styles.inc) - see this function for an example of how to construct this array.
+        );
+
+// Convert the HTML and put it into the PHPWord object
+        htmltodocx_insert_html($section, $html_dom_array[0]->nodes, $initial_state);
+
+// Clear the HTML dom object:
+        $html_dom->clear();
+        unset($html_dom);
+
+// Save File
+        $h2d_file_uri = tempnam('', 'htd');
+        $objWriter = PHPWord_IOFactory::createWriter($phpword_object, 'Word2007');
+        $objWriter->save($h2d_file_uri);
+
+// Download the file:
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=example.docx');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($h2d_file_uri));
+        ob_clean();
+        flush();
+        $status = readfile($h2d_file_uri);
+        unlink($h2d_file_uri);
+        exit;
     }
 
     /**
@@ -509,7 +664,7 @@ class ContentsController extends ControllerBase {
         $userName = $auth['name'];
 
         $dirPath = $this->config->upload_dir . $userName;
-        
+
         try {
             // Check if the user has uploaded files
             if ($this->request->hasFiles() == true) {
@@ -563,7 +718,7 @@ class ContentsController extends ControllerBase {
                         $content->content_name = $contentName;
                         $content->content_extension = $extension;
                         $content->uploaded = new Phalcon\Db\RawValue('now()');
-                        $content->created = time();
+                        $content->created = new Phalcon\Db\RawValue('now()');
 
                         // Create new directory if not exists
                         if (!is_dir($dirPath)) {

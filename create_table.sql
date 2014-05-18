@@ -45,7 +45,7 @@ CREATE TABLE `contents` (
   `content_size` int(11) NOT NULL,
   `content_extension` varchar(5) DEFAULT NULL,
   `status` enum('private','shared','public') DEFAULT 'private',
-  `created` int(11) DEFAULT '0',
+  `created` datetime NOT NULL,
   `uploaded` datetime NOT NULL,
   PRIMARY KEY (`content_id`),
   KEY `owner_id` (`owner_id`),
