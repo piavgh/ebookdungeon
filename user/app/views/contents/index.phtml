@@ -9,7 +9,20 @@ use Phalcon\Tag;
 <div class="pull-left">
     <?php echo $this->tag->linkTo(array("contents/create", '<span class="glyphicon glyphicon-edit"></span> Create new document', "role" => "button", "class" => "btn btn-large btn-success")) ?>
 </div>
-<br><br>
+<div class="pull-right">
+    <?php
+    echo Tag::form(array(
+        "contents/search",
+        "method" => "post",
+        "class" => "form-inline",
+    ));
+    ?>
+    <?php echo Tag::textField(array('search_documents', 'placeholder' => 'Search all documents', 'class' => 'form-control')); ?>
+    <?php echo Tag::submitButton(array("Search", 'class' => 'btn btn-success')) ?>
+
+    <?php echo Tag::endForm(); ?>
+</div>
+<div style="height: 80px;"></div>
 <?php
 echo Tag::form(array(
     "id" => "contentForm",

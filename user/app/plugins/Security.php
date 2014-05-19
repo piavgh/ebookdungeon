@@ -40,7 +40,8 @@ class Security extends Plugin
                 'lobby' => array('index'),
                 'groupadmin' => array('index','delete', 'active', 'reject'),
 				'groups' => array('index', 'join', 'access', 'leave', 'search'),
-				'account' => array('index')
+				'account' => array('index'),
+                'share' => array('index')
 			);
 			foreach ($privateResources as $resource => $actions) {
 				$acl->addResource(new Phalcon\Acl\Resource($resource), $actions);

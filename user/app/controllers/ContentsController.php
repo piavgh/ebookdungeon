@@ -195,7 +195,7 @@ class ContentsController extends ControllerBase {
                 $parameters = array();
             }
 
-            $parameters["order"] = "content_name";
+            $parameters["order"] = "content_id";
 
             $contents = Contents::find($parameters);
 
@@ -215,70 +215,91 @@ class ContentsController extends ControllerBase {
      * Searches for contents
      */
     public function searchAction() {
-
         /*
-         * Assets resource 
+         * Assets resource
          */
         // Adding style sheet
         $this->assets
-                ->addCss('upload_plugin/css/jquery.fileupload.css')
-                ->addCss('upload_plugin/css/jquery.fileupload-ui.css');
+            ->addCss('upload_plugin/css/jquery.fileupload.css')
+            ->addCss('upload_plugin/css/jquery.fileupload-ui.css');
 
         // Adding javascript
         $this->assets
-                ->addJs('upload_plugin/js/vendor/jquery.ui.widget.js')
-                ->addJs('upload_plugin/js/tmpl.min.js')
-                ->addJs('upload_plugin/js/load-image.min.js')
-                ->addJs('upload_plugin/js/canvas-to-blob.min.js')
-                ->addJs('upload_plugin/js/jquery.blueimp-gallery.min.js')
-                ->addJs('upload_plugin/js/jquery.iframe-transport.js')
-                ->addJs('upload_plugin/js/jquery.fileupload.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-process.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-image.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-audio.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-video.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-validate.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-ui.js')
-                ->addJs('upload_plugin/js/main.js');
+            ->addJs('upload_plugin/js/vendor/jquery.ui.widget.js')
+            ->addJs('upload_plugin/js/tmpl.min.js')
+            ->addJs('upload_plugin/js/load-image.min.js')
+            ->addJs('upload_plugin/js/canvas-to-blob.min.js')
+            ->addJs('upload_plugin/js/jquery.blueimp-gallery.min.js')
+            ->addJs('upload_plugin/js/jquery.iframe-transport.js')
+            ->addJs('upload_plugin/js/jquery.fileupload.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-process.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-image.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-audio.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-video.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-validate.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-ui.js')
+            ->addJs('upload_plugin/js/main.js');
 
-        $numberPage = 1;
-        if ($this->request->isPost()) {
-            $query = Criteria::fromInput($this->di, "Contents", $_POST);
-            $this->persistent->parameters = $query->getParams();
-        } else {
-            $numberPage = $this->request->getQuery("page", "int");
-            if ($numberPage <= 0) {
-                $numberPage = 1;
+        $auth = $this->session->get('auth');
+        $userId = $auth['id'];
+        $userName = $auth['name'];
+
+        // Account space
+        $maxSpace = $usedSpace = $availableSpace = $percent = 0;
+        $user = Users::findFirst("user_id = $userId");
+        if ($user) {
+            $maxSpace = intval($user->maximum);
+            $usedSpace = intval($user->used);
+            $availableSpace = intval($user->available);
+            $percent = ($maxSpace != 0) ? round((($usedSpace / $maxSpace) * 100), 2) : 0;
+        }
+
+        $this->view->setVar("maxSpace", $maxSpace);
+        $this->view->setVar("usedSpace", $usedSpace);
+        $this->view->setVar("availableSpace", $availableSpace);
+        $this->view->setVar("percent", $percent);
+
+        $dirPath = $this->config->upload_dir . $userName;
+
+        try {
+            $numberPage = 1;
+
+            if (!$this->request->isPost()) {
+                $numberPage = $this->request->getQuery("page", "int");
+                if ($numberPage <= 0) {
+                    $numberPage = 1;
+                }
+            } else {
+                $this->persistent->search_documents = $this->request->getPost('search_documents');
             }
-        }
 
-        $parameters = $this->persistent->parameters;
-        if (!is_array($parameters)) {
-            $parameters = array();
-        }
-        $parameters["order"] = "content_name";
+            if ($this->persistent->search_documents) {
+                $search_documents = $this->persistent->search_documents;
+            }
 
-        $contents = Contents::find($parameters);
-        if (count($contents) == 0) {
-            return $this->dispatcher->forward(array(
-                        "controller" => "contents",
-                        "action" => "index"
+            $sql = "SELECT Contents.* FROM Contents "
+                    . "WHERE Contents.owner_id = $userId ";
+            $sql = (isset($search_documents)) ? ($sql . "AND content_name LIKE '%$search_documents%'" ) : $sql;
+
+            $query = $this->modelsManager->createQuery($sql);
+            $contents = $query->execute();
+
+            $paginator = new Paginator(array(
+                "data" => $contents,
+                "limit" => 10,
+                "page" => $numberPage
             ));
+
+            $this->view->page = $paginator->getPaginate();
+        } catch (Exception $ex) {
+            $this->logger->error('Session exception: ' . $ex->getMessage());
         }
-
-        $paginator = new Paginator(array(
-            "data" => $contents,
-            "limit" => 10,
-            "page" => $numberPage
-        ));
-
-        $this->view->page = $paginator->getPaginate();
     }
 
     /**
      * Edits a content
      *
-     * @param string $content_id
+     * @param int $content_id
      */
     public function editAction($content_id = 0) {
         // Get session
@@ -422,40 +443,46 @@ class ContentsController extends ControllerBase {
             ));
         }
 
+        $auth = $this->session->get('auth');
+        $userId = $auth['id'];
+        $userName = $auth['name'];
+
+        $dirPath = $this->config->upload_dir . $userName . '\\';
+
         // Load the files we need:
         require_once 'phpword/PHPWord.php';
         require_once 'simplehtmldom/simple_html_dom.php';
         require_once 'htmltodocx_converter/h2d_htmlconverter.php';
         require_once 'example_files/styles.inc';
 
-// Functions to support this example.
+        // Functions to support this example.
         require_once 'documentation/support_functions.inc';
 
-// HTML fragment we want to parse:
+        // HTML fragment we want to parse:
         //$html = file_get_contents('example_files/example_html.html');
         $html = $this->request->getPost("content");
-// $html = file_get_contents('test/table.html');
+        // $html = file_get_contents('test/table.html');
 
-// New Word Document:
+        // New Word Document:
         $phpword_object = new PHPWord();
         $section = $phpword_object->createSection();
 
-// HTML Dom object:
+        // HTML Dom object:
         $html_dom = new simple_html_dom();
         $html_dom->load('<html><body>' . $html . '</body></html>');
-// Note, we needed to nest the html in a couple of dummy elements.
+        // Note, we needed to nest the html in a couple of dummy elements.
 
-// Create the dom array of elements which we are going to work on:
+        // Create the dom array of elements which we are going to work on:
         $html_dom_array = $html_dom->find('html',0)->children();
 
-// We need this for setting base_root and base_path in the initial_state array
-// (below). We are using a function here (derived from Drupal) to create these
-// paths automatically - you may want to do something different in your
-// implementation. This function is in the included file
-// documentation/support_functions.inc.
+        // We need this for setting base_root and base_path in the initial_state array
+        // (below). We are using a function here (derived from Drupal) to create these
+        // paths automatically - you may want to do something different in your
+        // implementation. This function is in the included file
+        // documentation/support_functions.inc.
         $paths = htmltodocx_paths();
 
-// Provide some initial settings:
+        // Provide some initial settings:
         $initial_state = array(
             // Required parameters:
             'phpword_object' => &$phpword_object, // Must be passed by reference.
@@ -479,32 +506,72 @@ class ContentsController extends ControllerBase {
             'style_sheet' => htmltodocx_styles_example(), // This is an array (the "style sheet") - returned by htmltodocx_styles_example() here (in styles.inc) - see this function for an example of how to construct this array.
         );
 
-// Convert the HTML and put it into the PHPWord object
+        // Convert the HTML and put it into the PHPWord object
         htmltodocx_insert_html($section, $html_dom_array[0]->nodes, $initial_state);
 
-// Clear the HTML dom object:
+        // Clear the HTML dom object:
         $html_dom->clear();
         unset($html_dom);
 
-// Save File
+        // Save File
         $h2d_file_uri = tempnam('', 'htd');
         $objWriter = PHPWord_IOFactory::createWriter($phpword_object, 'Word2007');
         $objWriter->save($h2d_file_uri);
 
-// Download the file:
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename=example.docx');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($h2d_file_uri));
-        ob_clean();
-        flush();
-        $status = readfile($h2d_file_uri);
-        unlink($h2d_file_uri);
-        exit;
+        // Create new content in contents table
+        $content = new Contents();
+        $content->owner_id = $userId;
+        $content->file_type = 'docx';
+        $content->uploaded = new Phalcon\Db\RawValue('now()');
+        $content->created = new Phalcon\Db\RawValue('now()');
+        $content->information = 'Untitled' . rand(1, 1000);
+        $content->path = $dirPath . $content->information . '.docx';
+        $content->content_size = filesize($h2d_file_uri);
+        $info = new SplFileInfo($h2d_file_uri);
+        $extension = $info->getExtension();
+        $contentName = $info->getBasename("." . $extension);
+        $content->content_name = $content->information;
+        $content->content_extension = $extension;
+        $content->status = 'private';
+
+        // Create new directory if not exists
+        if (!is_dir($dirPath)) {
+            if (!mkdir($dirPath)) {
+                $err = error_get_last();
+                $errors[] = $err['message'];
+                $this->logger->error($err['message']);
+                $this->flash->error($this->config->message->error->make_dir);
+            }
+        }
+
+        if (!$content->save()) {
+            $messages = $content->getMessages();
+            // Logging
+            foreach ($messages as $m) {
+                $errors[] = (string) $m;
+                $this->logger->error("Save file upload error: " . (string) $m);
+            }
+        }
+        //var_dump($dirPath . $contentName); die;
+        rename($h2d_file_uri, ($dirPath . $content->information . '.docx'));
+
+//        // Download the file:
+//        header('Content-Description: File Transfer');
+//        header('Content-Type: application/octet-stream');
+//        header('Content-Disposition: attachment; filename=' . $h2d_file_uri . '.docx');
+//        header('Content-Transfer-Encoding: binary');
+//        header('Expires: 0');
+//        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+//        header('Pragma: public');
+//        header('Content-Length: ' . filesize($h2d_file_uri));
+//        ob_clean();
+//        flush();
+//        $status = readfile($h2d_file_uri);
+
+//        unlink($h2d_file_uri);
+//        exit;
+        $this->flash->success("Your document is created successfully");
+        return $this->forward("contents/index");
     }
 
     /**

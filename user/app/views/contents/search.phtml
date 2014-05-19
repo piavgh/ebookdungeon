@@ -1,58 +1,122 @@
 <?php
- use Phalcon\Tag; ?>
+use Phalcon\Tag;
+?>
 
 <?php echo $this->getContent(); ?>
 
-<h1>Your contents</h1>
+<h1>Your E-books</h1><br>
+
+<div class="pull-left">
+    <?php echo $this->tag->linkTo(array("contents/create", '<span class="glyphicon glyphicon-edit"></span> Create new document', "role" => "button", "class" => "btn btn-large btn-success")) ?>
+</div>
+<div class="pull-right">
+    <?php
+    echo Tag::form(array(
+        "contents/search",
+        "method" => "post",
+        "class" => "form-inline",
+    ));
+    ?>
+    <?php echo Tag::textField(array('search_documents', 'placeholder' => 'Search all documents', 'class' => 'form-control')); ?>
+    <?php echo Tag::submitButton(array("Search", 'class' => 'btn btn-success')) ?>
+
+    <?php echo Tag::endForm(); ?>
+</div>
+<div style="height: 80px;"></div>
+<?php
+echo Tag::form(array(
+    "id" => "contentForm",
+    "contents/action",
+    "method" => "post"
+));
+?>
+
 <table class="table table-blue table-bordered table-striped" align="center">
     <thead>
-        <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Owner Id</th>
-            <th>Type</th>
-            <th>Size</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Uploaded</th>
-            <th colspan="2"></th>
-        </tr>
+    <tr>
+        <th style="width: 40px;">
+            <?php
+            echo Tag::checkField(array(
+                "delete_multi",
+                "onchange" => "Util.toggle_checkbox(this, 'content[]', callbackToggle);"
+            ));
+            ?>
+        </th>
+        <th>Id</th>
+        <th colspan="2">Name</th>
+        <th>Type</th>
+        <th>Size</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th colspan="2">Uploaded</th>
+    </tr>
     </thead>
     <tbody>
-        <?php
-        $i = 1;
-        foreach ($page->items as $content) {
-            ?>
-            <tr>
-                <td><?php echo $i++ ?></td>
-                <td><?php echo $content->content_name ?></td>
-                <td><?php echo $content->owner_id ?></td>
-                <td><?php echo $content->file_type ?></td>
-                <td><?php echo Utils::formatFileSize($content->content_size) ?></td>
-                <td><?php echo $content->status ?></td>
-                <td><?php echo $content->created ?></td>
-                <td><?php echo $content->uploaded ?></td>
-                <td class="center-container"><?php echo $this->tag->linkTo(array("contents/edit/" . $content->content_id, "class" => "btn btn-success", '<span class="glyphicon glyphicon-edit"></span> Edit')); ?></td>
-                <td class="center-container"><?php echo $this->tag->linkTo(array("contents/delete/" . $content->content_id, "class" => "btn btn-danger", '<span class="glyphicon glyphicon-remove"></span> Delete')); ?></td>
-            </tr>
-        <?php } ?>
+    <?php
+    $i = 1;
+    foreach ($page->items as $content) {
+        ?>
+        <tr>
+            <td>
+                <?php
+                echo Tag::checkField(array(
+                    "content[]",
+                    "value" => $content->content_id,
+                    "onchange" => "toggleBothBtn();"
+                ));
+                ?>
+            </td>
+            <td><?php echo $content->content_id ?></td>
+            <td colspan="2"><?php echo $this->tag->linkTo(array("contents/show/" . $content->content_id, $content->content_name)) ?></td>
+            <td><?php echo $content->file_type ?></td>
+            <td><?php echo Utils::formatFileSize($content->content_size) ?></td>
+            <td>
+                <?php
+                $status = $content->status;
+                if ($status == 'shared')
+                    echo "<span class=\"label label-success\">Member Only</span>";
+                elseif ($status == 'private')
+                    echo "<span class=\"label label-warning\">Only Me</span>";
+                else
+                    echo "<span class=\"label label-info\">Public</span>";
+                ?>
+            </td>
+            <td><?php echo $content->created ?></td>
+            <td colspan="2"><?php echo $content->uploaded ?></td>
+        </tr>
+    <?php } ?>
     </tbody>
     <tbody>
-        <tr>
-            <td colspan="10" align="right">
-                <table align="center">
-                    <tr>
-                        <td><?php echo $this->tag->linkTo(array("contents/index", '<span class="glyphicon glyphicon-fast-backward"></span> First', "role" => "button", "class" => "btn btn-default")) ?></td>
-                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->before, '<span class="glyphicon glyphicon-chevron-left"></span> Previous', "role" => "button", "class" => "btn btn-default")) ?></td>
-                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->next, 'Next <span class="glyphicon glyphicon-chevron-right"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
-                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->last, 'Last <span class="glyphicon glyphicon-fast-forward"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
-                        <td><?php echo $page->current, "/", $page->total_pages ?></td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
+    <tr>
+        <td colspan="2" align="center">
+            <?php echo "<div class='account-space'>" . "<span class='info-space used-space'>" . Utils::formatFileSize($usedSpace) . "</span>" . " ({$percent}%)" . " of " . "<span class='info-space '>" . Utils::formatFileSize($maxSpace) . "</span>" . " used" . "</div>" ?>
+        </td>
+        <td colspan="6" align="right">
+            <table align="center">
+                <tr>
+                    <td><?php echo $this->tag->linkTo(array("contents/search", '<span class="glyphicon glyphicon-fast-backward"></span> First', "role" => "button", "class" => "btn btn-default")) ?></td>
+                    <td><?php echo $this->tag->linkTo(array("contents/search?page=" . $page->before, '<span class="glyphicon glyphicon-chevron-left"></span> Previous', "role" => "button", "class" => "btn btn-default")) ?></td>
+                    <td><?php echo $this->tag->linkTo(array("contents/search?page=" . $page->next, 'Next <span class="glyphicon glyphicon-chevron-right"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                    <td><?php echo $this->tag->linkTo(array("contents/search?page=" . $page->last, 'Last <span class="glyphicon glyphicon-fast-forward"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                    <td><?php echo $page->current, "/", $page->total_pages ?></td>
+                </tr>
+            </table>
+        </td>
+        <td class="center-container">
+            <button type="submit" class="btn btn-success disabled" id="editBtn" name="edit_content">
+                <span class="glyphicon glyphicon-edit"></span> Edit
+            </button>
+        </td>
+        <td class="center-container">
+            <button type="submit" class="btn btn-danger disabled" id="deleteBtn" name="delete_content">
+                <span class="glyphicon glyphicon-trash"></span> Delete
+            </button>
+        </td>
+    </tr>
     <tbody>
 </table>
+
+<?php echo Tag::endForm(); ?>
 
 <!-- blueimp Gallery styles -->
 <link rel="stylesheet" href="http://blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
@@ -88,26 +152,38 @@ echo Tag::form(array(
 
 <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
 <div class="row fileupload-buttonbar">
-    <div class="col-lg-12">
+    <div class="col-lg-7" style="text-align: left;">
         <!-- The fileinput-button span is used to style the file input field as button -->
-        <span class="btn btn-success fileinput-button">
-            <i class="glyphicon glyphicon-plus"></i>
-            <span>Add files...</span>
-            <input type="file" name="files[]" multiple>
+        <span class="btn btn-lg btn-success fileinput-button">
+            <i class="glyphicon glyphicon-open"></i>
+            <span>Upload files...</span>
+            <input type="file" name="files[]" multiple onchange="Upload.add_file(this)">
         </span>
-        <button type="submit" class="btn btn-primary start">
+        <button type="submit" class="btn btn-lg btn-primary start" id="upall-btn">
             <i class="glyphicon glyphicon-upload"></i>
-            <span>Start upload</span>
+            <span>Upload all</span>
         </button>
-        <button type="reset" class="btn btn-warning cancel">
+        <button type="reset" class="btn btn-lg btn-warning cancel" id="cancelall-btn">
             <i class="glyphicon glyphicon-ban-circle"></i>
-            <span>Cancel upload</span>
+            <span>Cancel all</span>
         </button>
 
         <!-- The global file processing state -->
         <span class="fileupload-process"></span>
     </div>
-    
+
+    <div class="col-lg-5">
+        <button type="button" class="btn btn-lg btn-primary hidden-btn" id="upsel-btn" onclick="StartSelectedUpload()">
+            <i class="glyphicon glyphicon-upload"></i>
+            <span>Upload</span>
+        </button>
+
+        <button type="button" class="btn btn-lg btn-danger hidden-btn" id="delsel-btn" onclick="DeletedSelectedUpload()">
+            <i class="glyphicon glyphicon-trash"></i>
+            <span>Delete</span>
+        </button>
+    </div>
+
 </div>
 
 
@@ -126,6 +202,7 @@ echo Tag::form(array(
     <ol class="indicator"></ol>
 </div>
 <!-- The template to display files available for upload -->
+<script type="text/javascript">var j = 0;</script>
 <script id="template-upload" type="text/x-tmpl">
     {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload fade">
@@ -138,20 +215,23 @@ echo Tag::form(array(
     </td>
     <td>
     <p class="size">Processing...</p>
-    <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+    <div id="file_container_{%=i%}" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
     </td>
     <td>
     {% if (!i && !o.options.autoUpload) { %}
-    <button class="btn btn-primary start" disabled>
+    <button class="btn btn-primary start hidden" disabled>
     <i class="glyphicon glyphicon-upload"></i>
     <span>Start</span>
     </button>
     {% } %}
+
     {% if (!i) { %}
-    <button class="btn btn-warning cancel">
+    <button class="btn btn-warning cancel hidden">
     <i class="glyphicon glyphicon-ban-circle"></i>
     <span>Cancel</span>
     </button>
+
+    <input type="checkbox" onchange="toggleActionBtn()" name="file_act[]">
     {% } %}
     </td>
     </tr>
@@ -199,4 +279,137 @@ echo Tag::form(array(
     </td>
     </tr>
     {% } %}
+</script>
+
+<!-- Toggle action button state -->
+<script type="text/javascript">
+    // Setting upload available space
+    Global.availableSpace = <?php echo $availableSpace; ?>;
+
+    function toggleEditBtn(value) {
+        var e = document.getElementById('editBtn');
+
+        if (value) {
+            // enable button
+            $(e).removeClass('disabled');
+        } else {
+            // disable button
+            $(e).addClass('disabled');
+        }
+    }
+
+    function toggleDeleteBtn(value) {
+        var e = document.getElementById('deleteBtn');
+
+        if (value) {
+            // enable button
+            $(e).removeClass('disabled');
+        } else {
+            // disable button
+            $(e).addClass('disabled');
+        }
+    }
+
+    function toggleBothBtn() {
+        var checked = false;
+        var numCheck = 0;
+        var checkboxes = document.getElementsByName('content[]');
+        for (var i = 0; i < checkboxes.length; i++)
+        {
+            if (checkboxes[i].checked === true) {
+                checked = true;
+                numCheck++;
+                if (numCheck >= 2)
+                    break;
+            }
+        }
+        if (numCheck >= 2)
+            toggleEditBtn(!checked);
+        else
+            toggleEditBtn(checked);
+
+        toggleDeleteBtn(checked);
+    }
+
+    function callbackToggle(checkValue, numCheck) {
+        var toggleDelete = (numCheck <= 0) ? false : checkValue;
+
+        if (numCheck >= 2 || numCheck <= 0)
+            toggleEditBtn(false);
+        else
+            toggleEditBtn(checkValue);
+
+        toggleDeleteBtn(toggleDelete);
+    }
+
+    function displayActionBtn(isShow) {
+        if (isShow) {
+            // Show action buttons
+            $('#upsel-btn').show();
+            $('#delsel-btn').show();
+        } else {
+            // Hide action buttons
+            $('#upsel-btn').hide();
+            $('#delsel-btn').hide();
+        }
+    }
+
+    function toggleActionBtn() {
+        var checkboxes = document.getElementsByName('file_act[]');
+        var checked = false;
+
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked === true) {
+                checked = true;
+                break;
+            }
+        }
+
+        displayActionBtn(checked);
+    }
+
+    /* 
+     * Action handler
+     */
+    function StartSelectedUpload() {
+        var filesList = $('.files');
+        var checkboxes = document.getElementsByName('file_act[]');
+
+        // Get total file size
+        var total = 0;
+        total = Upload.getTotalSize(true);
+
+        // Show warning when the total uploading 
+        // greater than available space
+        if (total > Global.availableSpace) {
+            // Display warning dialog
+            Upload.showQuotaWarning(total);
+        } else {
+
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked === true)
+                    filesList.find('.start')[i].click();
+            }
+        }
+    }
+
+    function DeletedSelectedUpload() {
+        var filesList = $('.files');
+        var checkboxes = document.getElementsByName('file_act[]');
+        var checkLength = checkboxes.length;
+        var numDelete = 0;
+
+        for (var i = 0; i < checkLength; i++) {
+            if (checkboxes[i].checked === true) {
+                numDelete++;
+                filesList.find('.cancel')[i].click();
+            }
+        }
+
+        if (numDelete >= checkLength) {
+            // Hide action button when no upload file
+            displayActionBtn(false);
+            Upload.toggle_btn(0);   // Hide button bar
+        }
+    }
 </script>
