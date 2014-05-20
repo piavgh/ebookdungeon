@@ -31,7 +31,7 @@ echo Tag::form(array(
 ));
 ?>
 
-<table class="table table-blue table-bordered table-striped" align="center">
+<table id="documents_table" class="table table-blue table-bordered table-striped" align="center">
     <thead>
     <tr>
         <th style="width: 40px;">
@@ -412,4 +412,18 @@ echo Tag::form(array(
             Upload.toggle_btn(0);   // Hide button bar
         }
     }
+	jQuery(document).ready(function() {
+		var is_searching = false;
+		jQuery('#search_documents').on('keyup', function() {
+			var search_link = this.form.action;
+			if (is_searching == true) {
+				return;
+			}
+			is_searching = true;
+			jQuery.post(search_link, jQuery(this.form).serialize(), function(data) {
+				jQuery('#documents_table').replaceWith(jQuery(data).find('#documents_table')) ;
+				is_searching = false;
+			});
+		});
+	});
 </script>
