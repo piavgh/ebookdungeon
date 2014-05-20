@@ -447,7 +447,7 @@ class ContentsController extends ControllerBase {
         $userId = $auth['id'];
         $userName = $auth['name'];
 
-        $dirPath = $this->config->upload_dir . $userName . '\\';
+        $dirPath = $this->config->upload_dir . $userName . '/';
 
         // Load the files we need:
         require_once 'phpword/PHPWord.php';
@@ -521,17 +521,14 @@ class ContentsController extends ControllerBase {
         // Create new content in contents table
         $content = new Contents();
         $content->owner_id = $userId;
-        $content->file_type = 'docx';
+        $content->file_type = 'application/vnd.openxmlformats-officedoc';
         $content->uploaded = new Phalcon\Db\RawValue('now()');
         $content->created = new Phalcon\Db\RawValue('now()');
-        $content->information = 'Untitled' . rand(1, 1000);
-        $content->path = $dirPath . $content->information . '.docx';
+        $content->content_name = 'Untitled' . rand(1, 1000);
+        $content->information = $content->content_name . '.docx';
+        $content->path = $dirPath . $content->information;
         $content->content_size = filesize($h2d_file_uri);
-        $info = new SplFileInfo($h2d_file_uri);
-        $extension = $info->getExtension();
-        $contentName = $info->getBasename("." . $extension);
-        $content->content_name = $content->information;
-        $content->content_extension = $extension;
+        $content->content_extension = 'docx';
         $content->status = 'private';
 
         // Create new directory if not exists
@@ -553,7 +550,7 @@ class ContentsController extends ControllerBase {
             }
         }
         //var_dump($dirPath . $contentName); die;
-        rename($h2d_file_uri, ($dirPath . $content->information . '.docx'));
+        rename($h2d_file_uri, ($dirPath . $content->information));
 
 //        // Download the file:
 //        header('Content-Description: File Transfer');
@@ -908,4 +905,33 @@ class ContentsController extends ControllerBase {
         }
     }
 
+    public function downloadAction($content_id = 0) {
+        try {
+            $content = Contents::findFirst($content_id);
+            if ($content) {
+                $user = Users::findFirst("user_id = " . $content->owner_id);
+                $filePath = $content->path;
+                if (file_exists($filePath)) {
+                    header('Content-Description: File Transfer');
+                    header('Content-Type: application/octet-stream');
+                    header('Content-Disposition: inline; filename="' . basename($content->information) . '"');
+                    header('Content-Transfer-Encoding: binary');
+                    header('Expires: 0');
+                    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                    header('Pragma: public');
+                    header('Content-Length: ' . filesize($filePath));
+                    ob_clean();
+                    flush();
+                    readfile($filePath);
+                    exit();
+                }
+            } else {
+                $this->flash->error("Content was not found");
+                return $this->forward('contents/index');
+            }
+        } catch (Exception $ex) {
+            $this->logger->error('Download content exception: ' . $ex->getMessage());
+            return $this->forward('contents/index');
+        }
+    }
 }

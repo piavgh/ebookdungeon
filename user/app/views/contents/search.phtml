@@ -45,6 +45,7 @@ echo Tag::form(array(
         <th>Id</th>
         <th colspan="2">Name</th>
         <th>Type</th>
+        <th><span class="glyphicon glyphicon-download-alt"></span></th>
         <th>Size</th>
         <th>Status</th>
         <th>Created</th>
@@ -69,6 +70,7 @@ echo Tag::form(array(
             <td><?php echo $content->content_id ?></td>
             <td colspan="2"><?php echo $this->tag->linkTo(array("contents/show/" . $content->content_id, $content->content_name)) ?></td>
             <td><?php echo $content->file_type ?></td>
+            <td><?php echo $this->tag->linkTo(array("contents/download/" . $content->content_id, '<span class="glyphicon glyphicon-download-alt"></span>')) ?></td>
             <td><?php echo Utils::formatFileSize($content->content_size) ?></td>
             <td>
                 <?php
