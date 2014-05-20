@@ -25,6 +25,7 @@ use Phalcon\Tag;
     foreach ($page->items as $content) {
         ?>
         <tr>
+            <?php if (in_array($content->content_id, $need_content_ids)) { ?>
             <td><?php echo $content->content_id ?></td>
             <td colspan="2"><?php echo $this->tag->linkTo(array("contents/show/" . $content->content_id, $content->content_name)) ?></td>
             <td><?php echo $content->file_type ?></td>
@@ -42,6 +43,7 @@ use Phalcon\Tag;
             </td>
             <td><?php echo $content->created ?></td>
             <td colspan="2"><?php echo $content->uploaded ?></td>
+            <?php } ?>
         </tr>
     <?php } ?>
     </tbody>

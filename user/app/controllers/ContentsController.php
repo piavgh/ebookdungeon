@@ -4,9 +4,39 @@ use Phalcon\Mvc\Model\Criteria;
 use Phalcon\Paginator\Adapter\Model as Paginator;
 use Phalcon\Mvc\Model\Transaction\Failed as TxFailed;
 
-class ContentsController extends ControllerBase {
+class ContentsController extends ControllerBase
+{
+    private function read_file_docx($filename)
+    {
+        $striped_content = '';
+        $content = '';
+        if (!$filename || !file_exists($filename))
+            return false;
+        $zip = zip_open($filename);
+        if (!$zip || is_numeric($zip))
+            return false;
+        while ($zip_entry = zip_read($zip)) {
+            if (zip_entry_open($zip, $zip_entry) == FALSE)
+                continue;
+            if (zip_entry_name($zip_entry) != "word/document.xml")
+                continue;
+            $content .= zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
+            zip_entry_close($zip_entry);
+        }
+        // end while
+        zip_close($zip);
+        //echo $content;
+        //echo "<hr>";
+        //file_put_contents('1.xml', $content);
+        $content = str_replace('</w:r></w:p></w:tc><w:tc>', " ", $content);
+        $content = str_replace('</w:r></w:p>', "\r\n", $content);
+        $striped_content = strip_tags($content);
+        return $striped_content;
+    }
 
-    private function _deleteContent($content_id = 0) {
+
+    private function _deleteContent($content_id = 0)
+    {
         $auth = $this->session->get('auth');
         $userId = $auth['id'];
 
@@ -93,7 +123,8 @@ class ContentsController extends ControllerBase {
         return $result;
     }
 
-    public function actionAction() {
+    public function actionAction()
+    {
         $request = $this->request;
         if ($request->isPost()) {
             $contents = $request->getPost("content");
@@ -111,49 +142,51 @@ class ContentsController extends ControllerBase {
 
             } else {
                 return $this->dispatcher->forward(array(
-                            "controller" => "contents",
-                            "action" => "index"
+                    "controller" => "contents",
+                    "action" => "index"
                 ));
             }
         } else {
             return $this->dispatcher->forward(array(
-                        "controller" => "contents",
-                        "action" => "index"
+                "controller" => "contents",
+                "action" => "index"
             ));
         }
     }
 
-    public function initialize() {
+    public function initialize()
+    {
         $this->view->setTemplateAfter('backend');
         Tag::setTitle('Contents');
         parent::initialize();
     }
 
-    public function indexAction() {
+    public function indexAction()
+    {
         /*
          * Assets resource 
          */
         // Adding style sheet
         $this->assets
-                ->addCss('upload_plugin/css/jquery.fileupload.css')
-                ->addCss('upload_plugin/css/jquery.fileupload-ui.css');
+            ->addCss('upload_plugin/css/jquery.fileupload.css')
+            ->addCss('upload_plugin/css/jquery.fileupload-ui.css');
 
         // Adding javascript
         $this->assets
-                ->addJs('upload_plugin/js/vendor/jquery.ui.widget.js')
-                ->addJs('upload_plugin/js/tmpl.min.js')
-                ->addJs('upload_plugin/js/load-image.min.js')
-                ->addJs('upload_plugin/js/canvas-to-blob.min.js')
-                ->addJs('upload_plugin/js/jquery.blueimp-gallery.min.js')
-                ->addJs('upload_plugin/js/jquery.iframe-transport.js')
-                ->addJs('upload_plugin/js/jquery.fileupload.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-process.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-image.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-audio.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-video.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-validate.js')
-                ->addJs('upload_plugin/js/jquery.fileupload-ui.js')
-                ->addJs('upload_plugin/js/main.js');
+            ->addJs('upload_plugin/js/vendor/jquery.ui.widget.js')
+            ->addJs('upload_plugin/js/tmpl.min.js')
+            ->addJs('upload_plugin/js/load-image.min.js')
+            ->addJs('upload_plugin/js/canvas-to-blob.min.js')
+            ->addJs('upload_plugin/js/jquery.blueimp-gallery.min.js')
+            ->addJs('upload_plugin/js/jquery.iframe-transport.js')
+            ->addJs('upload_plugin/js/jquery.fileupload.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-process.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-image.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-audio.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-video.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-validate.js')
+            ->addJs('upload_plugin/js/jquery.fileupload-ui.js')
+            ->addJs('upload_plugin/js/main.js');
 
         $auth = $this->session->get('auth');
         $userId = $auth['id'];
@@ -214,7 +247,8 @@ class ContentsController extends ControllerBase {
     /**
      * Searches for contents
      */
-    public function searchAction() {
+    public function searchAction()
+    {
         /*
          * Assets resource
          */
@@ -278,8 +312,8 @@ class ContentsController extends ControllerBase {
             }
 
             $sql = "SELECT Contents.* FROM Contents "
-                    . "WHERE Contents.owner_id = $userId ";
-            $sql = (isset($search_documents)) ? ($sql . "AND content_name LIKE '%$search_documents%'" ) : $sql;
+                . "WHERE Contents.owner_id = $userId ";
+            $sql = (isset($search_documents)) ? ($sql . "AND content_name LIKE '%$search_documents%'") : $sql;
 
             $query = $this->modelsManager->createQuery($sql);
             $contents = $query->execute();
@@ -301,7 +335,8 @@ class ContentsController extends ControllerBase {
      *
      * @param int $content_id
      */
-    public function editAction($content_id = 0) {
+    public function editAction($content_id = 0)
+    {
         // Get session
         $auth = $this->session->get('auth');
         $userId = $auth['id'];
@@ -313,13 +348,13 @@ class ContentsController extends ControllerBase {
                 $this->flash->error("content was not found");
 
                 return $this->dispatcher->forward(array(
-                            "controller" => "contents",
-                            "action" => "index"
+                    "controller" => "contents",
+                    "action" => "index"
                 ));
             }
 
             $sql = 'SELECT Groups.*, Users.user_name FROM Groups '
-                    . 'JOIN Users on Groups.owner_id = Users.user_id ';
+                . 'JOIN Users on Groups.owner_id = Users.user_id ';
 
             $query = $this->modelsManager->createQuery($sql);
             $groups = $query->execute(array('groupId' => $groupId));
@@ -353,13 +388,14 @@ class ContentsController extends ControllerBase {
         } catch (Exception $ex) {
             $this->logger->error('Edit content exception: ' . $ex->getMessage());
             return $this->dispatcher->forward(array(
-                        "controller" => "contents",
-                        "action" => "index"
+                "controller" => "contents",
+                "action" => "index"
             ));
         }
     }
 
-    public function makecontentpublicAction($content_id = 0) {
+    public function makecontentpublicAction($content_id = 0)
+    {
         try {
             $content = Contents::findFirstBycontent_id($content_id);
             if (!$content) {
@@ -374,10 +410,10 @@ class ContentsController extends ControllerBase {
             $content->status = 'public';
             if (!$content->save()) {
                 $messages = $content->getMessages();
-                $this->flash->error((string) $messages[0]);
+                $this->flash->error((string)$messages[0]);
                 // Logging
                 foreach ($messages as $m) {
-                    $this->logger->error("Make content public error: " . (string) $m);
+                    $this->logger->error("Make content public error: " . (string)$m);
                 }
                 return $this->forward("contents/index");
             }
@@ -392,7 +428,8 @@ class ContentsController extends ControllerBase {
         }
     }
 
-    public function makecontentprivateAction($content_id = 0) {
+    public function makecontentprivateAction($content_id = 0)
+    {
         try {
             $content = Contents::findFirstBycontent_id($content_id);
             if (!$content) {
@@ -407,10 +444,10 @@ class ContentsController extends ControllerBase {
             $content->status = 'private';
             if (!$content->save()) {
                 $messages = $content->getMessages();
-                $this->flash->error((string) $messages[0]);
+                $this->flash->error((string)$messages[0]);
                 // Logging
                 foreach ($messages as $m) {
-                    $this->logger->error("Make content private error: " . (string) $m);
+                    $this->logger->error("Make content private error: " . (string)$m);
                 }
                 return $this->forward("contents/index");
             }
@@ -428,14 +465,16 @@ class ContentsController extends ControllerBase {
     /**
      * Creates a new document
      */
-    public function createAction() {
+    public function createAction()
+    {
 
     }
 
     /**
      * Save new document
      */
-    public function saveAction() {
+    public function saveAction()
+    {
         if (!$this->request->isPost()) {
             return $this->dispatcher->forward(array(
                 "controller" => "contents",
@@ -473,7 +512,7 @@ class ContentsController extends ControllerBase {
         // Note, we needed to nest the html in a couple of dummy elements.
 
         // Create the dom array of elements which we are going to work on:
-        $html_dom_array = $html_dom->find('html',0)->children();
+        $html_dom_array = $html_dom->find('html', 0)->children();
 
         // We need this for setting base_root and base_path in the initial_state array
         // (below). We are using a function here (derived from Drupal) to create these
@@ -545,8 +584,8 @@ class ContentsController extends ControllerBase {
             $messages = $content->getMessages();
             // Logging
             foreach ($messages as $m) {
-                $errors[] = (string) $m;
-                $this->logger->error("Save file upload error: " . (string) $m);
+                $errors[] = (string)$m;
+                $this->logger->error("Save file upload error: " . (string)$m);
             }
         }
         //var_dump($dirPath . $contentName); die;
@@ -575,11 +614,12 @@ class ContentsController extends ControllerBase {
      * Update a content edited
      *
      */
-    public function updateAction() {
+    public function updateAction()
+    {
         if (!$this->request->isPost()) {
             return $this->dispatcher->forward(array(
-                        "controller" => "contents",
-                        "action" => "index"
+                "controller" => "contents",
+                "action" => "index"
             ));
         }
 
@@ -612,7 +652,7 @@ class ContentsController extends ControllerBase {
 
                         // Logging
                         foreach ($messages as $m) {
-                            $this->logger->error("Share content error: " . (string) $m);
+                            $this->logger->error("Share content error: " . (string)$m);
                         }
                     } else {
                         $isShared = true;
@@ -627,7 +667,7 @@ class ContentsController extends ControllerBase {
                 $isError = TRUE;
                 // Logging
                 foreach ($content->getMessages() as $m) {
-                    $this->logger->error("Share content error: " . (string) $m);
+                    $this->logger->error("Share content error: " . (string)$m);
                 }
             }
 
@@ -655,7 +695,7 @@ class ContentsController extends ControllerBase {
                             $isError = TRUE;
                             // Logging
                             foreach ($shared->getMessages() as $m) {
-                                $this->logger->error("Private content error: " . (string) $m);
+                                $this->logger->error("Private content error: " . (string)$m);
                             }
                         }
                     }
@@ -671,9 +711,9 @@ class ContentsController extends ControllerBase {
         }
 
         return $this->dispatcher->forward(array(
-                    "controller" => "contents",
-                    "action" => "edit",
-                    "params" => array($content_id)
+            "controller" => "contents",
+            "action" => "edit",
+            "params" => array($content_id)
         ));
     }
 
@@ -681,7 +721,8 @@ class ContentsController extends ControllerBase {
      * Get convert call
      */
 
-    public function convertAction() {
+    public function convertAction()
+    {
         $request = $this->request;
         if ($request->isPost()) {
             if ($request->hasPost("trigger_converter") && ($request->getPost("trigger_converter") == 1)) {
@@ -698,7 +739,8 @@ class ContentsController extends ControllerBase {
      * Delete multiple contents
      */
 
-    private function _deleteAction($contentList) {
+    private function _deleteAction($contentList)
+    {
         $result = TRUE;
 
         try {
@@ -717,12 +759,13 @@ class ContentsController extends ControllerBase {
             $this->flash->success("Content was deleted successfully");
 
         return $this->dispatcher->forward(array(
-                    "controller" => "contents",
-                    "action" => "index",
+            "controller" => "contents",
+            "action" => "index",
         ));
     }
 
-    public function uploadAction() {
+    public function uploadAction()
+    {
         $auth = $this->session->get('auth');
         $userId = $auth['id'];
         $userName = $auth['name'];
@@ -805,29 +848,29 @@ class ContentsController extends ControllerBase {
                             if (!$content->save()) {
                                 // Rollback
                                 $messages = $content->getMessages();
-                                $transaction->rollback((string) $messages[0]);
+                                $transaction->rollback((string)$messages[0]);
 
                                 // Logging
                                 foreach ($messages as $m) {
-                                    $errors[] = (string) $m;
-                                    $this->logger->error("Save file upload error: " . (string) $m);
+                                    $errors[] = (string)$m;
+                                    $this->logger->error("Save file upload error: " . (string)$m);
                                 }
                             } else {
-                                    // Update user account space info
-                                    $user->used += $fileSize;
-                                    $user->available -= $fileSize;
-                                    $user->setTransaction($transaction);
+                                // Update user account space info
+                                $user->used += $fileSize;
+                                $user->available -= $fileSize;
+                                $user->setTransaction($transaction);
 
-                                    if ($user->save() == FALSE) {
-                                        $messages = $user->getMessages();
-                                        // Rollback
-                                        $transaction->rollback((string) $messages[0]);
+                                if ($user->save() == FALSE) {
+                                    $messages = $user->getMessages();
+                                    // Rollback
+                                    $transaction->rollback((string)$messages[0]);
 
-                                        foreach ($messages as $m) {
-                                            $errors[] = (string) $m;
-                                            $this->logger->error("Save account space info error: " . (string) $m);
-                                        }
+                                    foreach ($messages as $m) {
+                                        $errors[] = (string)$m;
+                                        $this->logger->error("Save account space info error: " . (string)$m);
                                     }
+                                }
 
                                 // Success transaction
                                 $transaction->commit();
@@ -875,25 +918,39 @@ class ContentsController extends ControllerBase {
      * @param content_id
      */
 
-    public function showAction($content_id = 0) {
+    public function showAction($content_id = 0)
+    {
         try {
             $content = Contents::findFirst($content_id);
             if ($content) {
-                $user = Users::findFirst("user_id = " . $content->owner_id);
-                $filePath = $content->path;
-                if (file_exists($filePath)) {
-                    header('Content-Description: File Transfer');
-                    header('Content-Type: ' . $content->file_type);
-                    header('Content-Disposition: inline; filename="' . basename($content->information) . '"');
-                    header('Content-Transfer-Encoding: binary');
-                    header('Expires: 0');
-                    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-                    header('Pragma: public');
-                    header('Content-Length: ' . filesize($filePath));
-                    ob_clean();
-                    flush();
-                    readfile($filePath);
-                    exit();
+                if ($content->content_extension != 'docx') {
+                    $user = Users::findFirst("user_id = " . $content->owner_id);
+                    $filePath = $content->path;
+                    if (file_exists($filePath)) {
+                        header('Content-Description: File Transfer');
+                        header('Content-Type: ' . $content->file_type);
+                        header('Content-Disposition: inline; filename="' . basename($content->information) . '"');
+                        header('Content-Transfer-Encoding: binary');
+                        header('Expires: 0');
+                        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                        header('Pragma: public');
+                        header('Content-Length: ' . filesize($filePath));
+                        ob_clean();
+                        flush();
+                        readfile($filePath);
+                        exit();
+                    }
+                } else {
+                    $user = Users::findFirst("user_id = " . $content->owner_id);
+                    $filePath = $content->path;
+                    if (file_exists($filePath)) {
+                        $content = $this->read_file_docx($filePath);
+                        if ($content !== false) {
+                            echo nl2br($content);
+                        } else {
+                            echo 'Couldn\'t the file. Please check that file.';
+                        }
+                    }
                 }
             } else {
                 $this->flash->error("Content was not found");
@@ -905,7 +962,8 @@ class ContentsController extends ControllerBase {
         }
     }
 
-    public function downloadAction($content_id = 0) {
+    public function downloadAction($content_id = 0)
+    {
         try {
             $content = Contents::findFirst($content_id);
             if ($content) {
