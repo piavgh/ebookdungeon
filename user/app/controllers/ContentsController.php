@@ -967,14 +967,35 @@ class ContentsController extends ControllerBase
                     $highestRow = $sheet->getHighestRow();
                     $highestColumn = $sheet->getHighestColumn();
 
-                    //  Loop through each row of the worksheet in turn
-                    for ($row = 1; $row <= $highestRow; $row++) {
-                        //  Read a row of data into an array
+                    echo '<div class="table-responsive">';
+                    echo '<table class="table table-blue table-bordered table-hover">';
+                    echo '<thead>';
+                    $row = 1;
+                    $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
+                        NULL, TRUE, FALSE);
+                    echo '<tr>';
+                    foreach($rowData[0] as $k=>$v) {
+                        ?>
+                        <th><?php echo $v ?></th>
+                        <?php
+                    }
+                    echo '</tr>';
+                    echo '</thead>';
+                    echo '<tbody>';
+                    for ($row = 2; $row <= $highestRow; $row++) {
                         $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
                             NULL, TRUE, FALSE);
-                        foreach($rowData[0] as $k=>$v)
-                            echo "Row: ".$row."- Col: ".($k+1)." = ".$v."<br />";
+                        echo '<tr>';
+                        foreach($rowData[0] as $k=>$v) {
+                            ?>
+                            <td><?php echo $v ?></td>
+                        <?php
+                        }
+                        echo '</tr>';
                     }
+                    echo '</tbody>';
+                    echo '</table>';
+                    echo '</div>';
                 } else {
                     $user = Users::findFirst("user_id = " . $content->owner_id);
                     $filePath = $content->path;
