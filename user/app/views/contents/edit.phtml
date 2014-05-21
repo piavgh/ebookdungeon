@@ -32,11 +32,22 @@ echo Tag::form(array(
                 <p><b>File Size: </b><?php echo Utils::formatFileSize($content->content_size) ?></p>
                 <p><b>Status: </b><?php echo $content->status ?></p>
                 <p><b>Uploaded: </b><?php echo $content->uploaded ?></p>
-                <?php if ($content->status == 'private' || $content->status == 'shared') {?>
+                <?php if ($content->status == 'private') {?>
                 <p><?php echo $this->tag->linkTo(array("contents/makecontentpublic/" . $content->content_id, 'Change this item to public')) ?></p>
                 <?php } elseif ($content->status == 'public') { ?>
                 <p><?php echo $this->tag->linkTo(array("contents/makecontentprivate/" . $content->content_id, 'Change this item to private')) ?></p>
                 <?php } ?>
+                <?php
+                echo Tag::form(array(
+                    "contents/changename",
+                    "method" => "post",
+                    "class" => "form-inline",
+                ));
+                ?>
+                <?php echo Tag::textField(array('new_ebook_name', 'placeholder' => 'Enter new e-book name', 'class' => 'form-control')); ?>
+                <?php echo Tag::submitButton(array("Update", 'class' => 'btn btn-sm btn-warning')) ?>
+
+                <?php echo Tag::endForm(); ?>
             </div>
         </div>
     </div>
