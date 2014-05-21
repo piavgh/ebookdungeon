@@ -16,7 +16,6 @@
     {{ content() }}
     <hr>
     <footer>
-        <p class="pull-left">Copyright &copy; Pacific NW Investments, Ltd. 2014, All Rights Reserved.</p>
-		<p class="pull-right">Powered by <a href="http://www.agile.vn">Agile Techno Solutions</a>.</p>
+        <p class="pull-left">Copyright &copy; 2014, All Rights Reserved.</p>
     </footer>
 </div>
