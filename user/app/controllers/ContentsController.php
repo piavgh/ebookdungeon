@@ -920,10 +920,62 @@ class ContentsController extends ControllerBase
 
     public function showAction($content_id = 0)
     {
+        $auth = $this->session->get('auth');
+        $userId = $auth['id'];
+        $userName = $auth['name'];
         try {
             $content = Contents::findFirst($content_id);
+
             if ($content) {
-                if ($content->content_extension != 'docx') {
+                if ($content->status == 'private' && $content->owner_id != $userId) {
+                    $this->flash->error("You don't have the right to view this document!");
+                    return $this->forward("contents/index");
+                }
+                if ($content->content_extension == 'docx') {
+                    $user = Users::findFirst("user_id = " . $content->owner_id);
+                    $filePath = $content->path;
+                    if (file_exists($filePath)) {
+                        $content = $this->read_file_docx($filePath);
+                        if ($content !== false) {
+                            echo '<div style="width: 90%; background-color: #ffffff">';
+                            echo nl2br($content);
+                            echo '</div>';
+                        } else {
+                            echo 'Couldn\'t the file. Please check that file.';
+                        }
+                    }
+                } elseif ($content->content_extension == 'xlsx' || $content->content_extension == 'xls') {
+
+                    $user = Users::findFirst("user_id = " . $content->owner_id);
+                    $filePath = $content->path;
+                    include 'Classes/PHPExcel/IOFactory.php';
+
+                    $inputFileName = $filePath;
+
+                    //  Read your Excel workbook
+                    try {
+                        $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+                        $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+                        $objPHPExcel = $objReader->load($inputFileName);
+                    } catch (Exception $e) {
+                        die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
+                            . '": ' . $e->getMessage());
+                    }
+
+                    //  Get worksheet dimensions
+                    $sheet = $objPHPExcel->getSheet(0);
+                    $highestRow = $sheet->getHighestRow();
+                    $highestColumn = $sheet->getHighestColumn();
+
+                    //  Loop through each row of the worksheet in turn
+                    for ($row = 1; $row <= $highestRow; $row++) {
+                        //  Read a row of data into an array
+                        $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
+                            NULL, TRUE, FALSE);
+                        foreach($rowData[0] as $k=>$v)
+                            echo "Row: ".$row."- Col: ".($k+1)." = ".$v."<br />";
+                    }
+                } else {
                     $user = Users::findFirst("user_id = " . $content->owner_id);
                     $filePath = $content->path;
                     if (file_exists($filePath)) {
@@ -939,17 +991,6 @@ class ContentsController extends ControllerBase
                         flush();
                         readfile($filePath);
                         exit();
-                    }
-                } else {
-                    $user = Users::findFirst("user_id = " . $content->owner_id);
-                    $filePath = $content->path;
-                    if (file_exists($filePath)) {
-                        $content = $this->read_file_docx($filePath);
-                        if ($content !== false) {
-                            echo nl2br($content);
-                        } else {
-                            echo 'Couldn\'t the file. Please check that file.';
-                        }
                     }
                 }
             } else {
