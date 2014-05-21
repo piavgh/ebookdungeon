@@ -331,6 +331,15 @@ class ContentsController extends ControllerBase
     }
 
     /**
+     *  Change name of a document
+     */
+    public function changenameAction() {
+        $auth = $this->session->get('auth');
+        $userId = $auth['id'];
+        $groupId = $auth['group_id'];
+    }
+
+    /**
      * Edits a content
      *
      * @param int $content_id
@@ -557,6 +566,13 @@ class ContentsController extends ControllerBase
         $objWriter = PHPWord_IOFactory::createWriter($phpword_object, 'Word2007');
         $objWriter->save($h2d_file_uri);
 
+        // Check user space available
+        $availSpace = 0;
+        $user = Users::findFirst("user_id = $userId");
+        if ($user) {
+            $availSpace = intval($user->available);
+        }
+
         // Create new content in contents table
         $content = new Contents();
         $content->owner_id = $userId;
@@ -569,6 +585,13 @@ class ContentsController extends ControllerBase
         $content->content_size = filesize($h2d_file_uri);
         $content->content_extension = 'docx';
         $content->status = 'private';
+        $user->used += $content->content_size;
+        $user->available -= $content->content_size;
+
+        if ($user->available < 0) {
+            $this->flash->error("Available space is not enough");
+            return $this->forward("contents/index");
+        }
 
         // Create new directory if not exists
         if (!is_dir($dirPath)) {
@@ -715,24 +738,6 @@ class ContentsController extends ControllerBase
             "action" => "edit",
             "params" => array($content_id)
         ));
-    }
-
-    /*
-     * Get convert call
-     */
-
-    public function convertAction()
-    {
-        $request = $this->request;
-        if ($request->isPost()) {
-            if ($request->hasPost("trigger_converter") && ($request->getPost("trigger_converter") == 1)) {
-                $auth = $this->session->get('auth');
-                $userName = $auth['name'];
-
-                // Trigger the converter
-                $this->_instantConvert($userName);
-            }
-        }
     }
 
     /*
@@ -932,7 +937,6 @@ class ContentsController extends ControllerBase
                     return $this->forward("contents/index");
                 }
                 if ($content->content_extension == 'docx') {
-                    $user = Users::findFirst("user_id = " . $content->owner_id);
                     $filePath = $content->path;
                     if (file_exists($filePath)) {
                         $content = $this->read_file_docx($filePath);
@@ -944,9 +948,22 @@ class ContentsController extends ControllerBase
                             echo 'Couldn\'t the file. Please check that file.';
                         }
                     }
+                } elseif ($content->content_extension == 'doc') {
+                    $DocumentPath = $content->path;
+                    $word = new COM("word.application") or die("Unable to instantiate application object");
+                    $wordDocument = new COM("word.document") or die("Unable to instantiate document object");
+                    $word->Visible = 0;
+                    $wordDocument = $word->Documents->Open($DocumentPath);
+                    $HTMLPath = substr_replace($DocumentPath, 'html', -3, 3);
+                    $wordDocument->SaveAs($HTMLPath, 3);
+                    $wordDocument = null;
+                    $word->Quit();
+                    $word = null;
+                    echo '<div style="width: 90%; background-color: #ffffff">';
+                    echo readfile($HTMLPath);
+                    echo '</div>';
+                    unlink($HTMLPath);
                 } elseif ($content->content_extension == 'xlsx' || $content->content_extension == 'xls') {
-
-                    $user = Users::findFirst("user_id = " . $content->owner_id);
                     $filePath = $content->path;
                     include 'Classes/PHPExcel/IOFactory.php';
 
@@ -997,7 +1014,6 @@ class ContentsController extends ControllerBase
                     echo '</table>';
                     echo '</div>';
                 } else {
-                    $user = Users::findFirst("user_id = " . $content->owner_id);
                     $filePath = $content->path;
                     if (file_exists($filePath)) {
                         header('Content-Description: File Transfer');
