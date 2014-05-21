@@ -66,3 +66,17 @@
         </tr>
 
 </table>
+
+<div class="pull-left">
+    <?php
+    echo Tag::form(array(
+        "groupadmin/changegroupname",
+        "method" => "post",
+        "class" => "form-inline",
+    ));
+    ?>
+    <?php echo Tag::textField(array('group_name', 'placeholder' => 'Enter new group name', 'class' => 'form-control')); ?>
+    <?php echo Tag::submitButton(array("Update", 'class' => 'btn btn-sm btn-warning')) ?>
+
+    <?php echo Tag::endForm(); ?>
+</div>

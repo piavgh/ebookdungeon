@@ -161,4 +161,39 @@ class GroupadminController extends ControllerBase {
         ));
     }
 
+    /**
+     * Change name of a group
+     * @return mixed
+     */
+    public function changegroupnameAction() {
+        $auth = $this->session->get('auth');
+        $userId = $auth['id'];
+        $groupId = $auth['group_id'];
+
+        // Check valid group account
+        if ($groupId <= 0)
+            return $this->redirect("groupadmin/index");
+
+        $group = Groups::findFirstBygroup_id($groupId);
+
+        if (!$group) {
+            return $this->redirect("groupadmin/index");
+        }
+
+        if (!$this->request->isPost()) {
+            return $this->redirect("groupadmin/index");
+        } else {
+            $group_name = $this->request->getPost('group_name');
+        }
+
+        $group->group_name = $group_name;
+        if (!$group->save()) {
+            $this->flash->error($this->config->message->error->change_group_name);
+            $this->logger->error("Cannot change group name group_id = $groupId");
+        } else {
+            $this->flash->success($this->config->message->success->change_group_name);
+        }
+        return $this->forward("groupadmin/index");
+    }
+
 }

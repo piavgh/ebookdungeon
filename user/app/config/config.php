@@ -40,11 +40,13 @@ $settings = array(
             'upload' => 'Content was uploaded successfully!',
             'save' => 'Info was updated successfully!',
             'update_content' => 'Content was updated successfully!',
-            'upgrade_group' => 'Account has changed successfully!'
+            'upgrade_group' => 'Account has changed successfully!',
+            'change_group_name' => 'Group name changed successfully'
         ),
         'error' => array(
             'make_dir' => 'Error has occured. Please try again later or contact us for the help!',
             'change_member_status' => "Cannot change member's status. Please try again later!",
+            'change_group_name' => 'Can not change group name. Please try again later!',
             'delete_content' => 'Error has occured. Content cannot be deleted',
             'update_content' => 'Error has occured!',
             'user_mail_existence' => 'This email does not exist in our system.',

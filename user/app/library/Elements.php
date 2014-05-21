@@ -26,7 +26,7 @@ class Elements extends \Phalcon\Mvc\User\Component {
         )
     );
     private $_menu = array(
-        'Share E-books' => array(
+        'Available' => array(
             'controller' => 'share',
             'action' => 'index',
             'any' => false
@@ -48,7 +48,7 @@ class Elements extends \Phalcon\Mvc\User\Component {
         )
     );
     private $_group_menu = array(
-        'Share E-books' => array(
+        'Available' => array(
             'controller' => 'share',
             'action' => 'index',
             'any' => false

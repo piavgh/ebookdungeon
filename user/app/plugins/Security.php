@@ -38,7 +38,7 @@ class Security extends Plugin
 			$privateResources = array(
 				'contents' => array('index', 'search', 'create', 'save', 'delete','upload','show', 'download', 'edit', 'update', 'convert', 'action', 'makecontentpublic', 'makecontentprivate'),
                 'lobby' => array('index'),
-                'groupadmin' => array('index','delete', 'active', 'reject'),
+                'groupadmin' => array('index','delete', 'active', 'reject', 'changegroupname'),
 				'groups' => array('index', 'join', 'access', 'leave', 'search'),
 				'account' => array('index'),
                 'share' => array('index')
