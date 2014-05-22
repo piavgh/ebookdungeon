@@ -42,7 +42,7 @@ $userName = $auth['name'];
 
             <div class="table-responsive">
                 <h2>Groups</h2>
-                <table class="table table-blue table-striped">
+                <table id="groups_table" class="table table-blue table-striped">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -111,3 +111,20 @@ $userName = $auth['name'];
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    jQuery(document).ready(function() {
+        var is_searching = false;
+        jQuery('#group_name').on('keyup', function() {
+            var search_link = this.form.action;
+            if (is_searching == true) {
+                return;
+            }
+            is_searching = true;
+            jQuery.post(search_link, jQuery(this.form).serialize(), function(data) {
+                jQuery('#groups_table').replaceWith(jQuery(data).find('#groups_table')) ;
+                is_searching = false;
+            });
+        });
+    });
+</script>
