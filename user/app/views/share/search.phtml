@@ -40,23 +40,23 @@ use Phalcon\Tag;
         ?>
         <tr>
             <?php if (in_array($content->content_id, $need_content_ids)) { ?>
-            <td><?php echo $content->content_id ?></td>
-            <td colspan="2"><?php echo $this->tag->linkTo(array("contents/show/" . $content->content_id, $content->content_name)) ?></td>
-            <td><?php echo $content->file_type ?></td>
-            <td><?php echo Utils::formatFileSize($content->content_size) ?></td>
-            <td>
-                <?php
-                $status = $content->status;
-                if ($status == 'shared')
-                    echo "<span class=\"label label-success\">Member Only</span>";
-                elseif ($status == 'private')
-                    echo "<span class=\"label label-warning\">Only Me</span>";
-                else
-                    echo "<span class=\"label label-info\">Public</span>";
-                ?>
-            </td>
-            <td><?php echo $content->created ?></td>
-            <td colspan="2"><?php echo $content->uploaded ?></td>
+                <td><?php echo $content->content_id ?></td>
+                <td colspan="2"><?php echo $this->tag->linkTo(array("contents/show/" . $content->content_id, $content->content_name)) ?></td>
+                <td><?php echo $content->file_type ?></td>
+                <td><?php echo Utils::formatFileSize($content->content_size) ?></td>
+                <td>
+                    <?php
+                    $status = $content->status;
+                    if ($status == 'shared')
+                        echo "<span class=\"label label-success\">Member Only</span>";
+                    elseif ($status == 'private')
+                        echo "<span class=\"label label-warning\">Only Me</span>";
+                    else
+                        echo "<span class=\"label label-info\">Public</span>";
+                    ?>
+                </td>
+                <td><?php echo $content->created ?></td>
+                <td colspan="2"><?php echo $content->uploaded ?></td>
             <?php } ?>
         </tr>
     <?php } ?>

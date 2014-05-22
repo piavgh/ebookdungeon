@@ -183,7 +183,7 @@ class GroupadminController extends ControllerBase {
         if (!$this->request->isPost()) {
             return $this->redirect("groupadmin/index");
         } else {
-            $group_name = $this->request->getPost('group_name');
+            $group_name = $this->request->getPost('group_name', 'alphanum');
         }
 
         $group->group_name = $group_name;

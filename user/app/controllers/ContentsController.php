@@ -333,10 +333,37 @@ class ContentsController extends ControllerBase
     /**
      *  Change name of a document
      */
-    public function changenameAction() {
+    public function changenameAction($content_id) {
         $auth = $this->session->get('auth');
         $userId = $auth['id'];
         $groupId = $auth['group_id'];
+
+        if (!$this->request->isPost()) {
+            return $this->redirect("contents/index");
+        } else {
+            $new_document_name = $this->request->getPost('new_document_name', 'alphanum');
+        }
+
+        $content = Contents::findFirstBycontent_id("$content_id");
+
+        if (!$content) {
+            $this->flash->error("Document not found!");
+            return $this->forward("contents/index");
+        }
+
+        if ($content->owner_id != $userId) {
+            $this->flash->error("You don't have the right to change this document name");
+            return $this->forward("contents/index");
+        }
+
+        $content->content_name = $new_document_name;
+        if (!$content->save()) {
+            $this->flash->error($this->config->message->error->update_content);
+            $this->logger->error("Cannot change document name content_id = $content_id");
+        } else {
+            $this->flash->success("Change document name successfully");
+        }
+        return $this->forward("contents/index");
     }
 
     /**

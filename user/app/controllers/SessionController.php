@@ -298,7 +298,7 @@ class SessionController extends ControllerBase {
                     return $this->redirect("contents/index");
                 } else {
                     $this->_registerSession($user, $group->group_id);
-                    return $this->redirect("lobby/index");
+                    return $this->redirect("contents/index");
                 }
 
                 //return $this->forward('contents/index');

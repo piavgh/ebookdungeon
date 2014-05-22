@@ -37,17 +37,6 @@ echo Tag::form(array(
                 <?php } elseif ($content->status == 'public') { ?>
                 <p><?php echo $this->tag->linkTo(array("contents/makecontentprivate/" . $content->content_id, 'Change this item to private')) ?></p>
                 <?php } ?>
-                <?php
-                echo Tag::form(array(
-                    "contents/changename",
-                    "method" => "post",
-                    "class" => "form-inline",
-                ));
-                ?>
-                <?php echo Tag::textField(array('new_ebook_name', 'placeholder' => 'Enter new e-book name', 'class' => 'form-control')); ?>
-                <?php echo Tag::submitButton(array("Update", 'class' => 'btn btn-sm btn-warning')) ?>
-
-                <?php echo Tag::endForm(); ?>
             </div>
         </div>
     </div>
@@ -133,3 +122,16 @@ echo Tag::hiddenField(array(
 
 <?php echo Tag::endForm() ?>
 
+<div class="pull-left" style="margin-top: 50px;">
+<?php
+echo Tag::form(array(
+    "contents/changename/$content->content_id",
+    "method" => "post",
+    "class" => "form-inline",
+));
+?>
+<?php echo Tag::textField(array('new_document_name', 'placeholder' => 'Enter new document name', 'class' => 'form-control')); ?>
+<?php echo Tag::submitButton(array("Update", 'class' => 'btn btn-large btn-warning')) ?>
+
+<?php echo Tag::endForm(); ?>
+</div>

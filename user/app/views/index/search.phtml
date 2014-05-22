@@ -1,6 +1,6 @@
 <div class="container">
     <div class="row" id="sign-in-row">
-        <div class="col-lg-4">                  
+        <div class="col-lg-4">
         </div>
         <div class="col-lg-4">
         </div>
@@ -22,7 +22,7 @@
         </div>
     </div>
 
-<?php $this->elements->getNavMenu(); ?>
+    <?php $this->elements->getNavMenu(); ?>
 
     <?php
     use Phalcon\Tag;
@@ -87,10 +87,10 @@
             <td colspan="8" align="right">
                 <table align="center">
                     <tr>
-                        <td><?php echo $this->tag->linkTo(array("contents/index", '<span class="glyphicon glyphicon-fast-backward"></span> First', "role" => "button", "class" => "btn btn-default")) ?></td>
-                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->before, '<span class="glyphicon glyphicon-chevron-left"></span> Previous', "role" => "button", "class" => "btn btn-default")) ?></td>
-                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->next, 'Next <span class="glyphicon glyphicon-chevron-right"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
-                        <td><?php echo $this->tag->linkTo(array("contents/index?page=" . $page->last, 'Last <span class="glyphicon glyphicon-fast-forward"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                        <td><?php echo $this->tag->linkTo(array("contents/search", '<span class="glyphicon glyphicon-fast-backward"></span> First', "role" => "button", "class" => "btn btn-default")) ?></td>
+                        <td><?php echo $this->tag->linkTo(array("contents/search?page=" . $page->before, '<span class="glyphicon glyphicon-chevron-left"></span> Previous', "role" => "button", "class" => "btn btn-default")) ?></td>
+                        <td><?php echo $this->tag->linkTo(array("contents/search?page=" . $page->next, 'Next <span class="glyphicon glyphicon-chevron-right"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
+                        <td><?php echo $this->tag->linkTo(array("contents/search?page=" . $page->last, 'Last <span class="glyphicon glyphicon-fast-forward"></span>', "role" => "button", "class" => "btn btn-default")) ?></td>
                         <td><?php echo $page->current, "/", $page->total_pages ?></td>
                     </tr>
                 </table>
