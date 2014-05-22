@@ -26,7 +26,35 @@ use Phalcon\Forms\Element\Date;
 use Phalcon\Forms\Element\Textarea;
 use Phalcon\Forms\Element\Select;
 class ContentsController extends ControllerBase {
-	
+
+    private function read_file_docx($filename)
+    {
+        $striped_content = '';
+        $content = '';
+        if (!$filename || !file_exists($filename))
+            return false;
+        $zip = zip_open($filename);
+        if (!$zip || is_numeric($zip))
+            return false;
+        while ($zip_entry = zip_read($zip)) {
+            if (zip_entry_open($zip, $zip_entry) == FALSE)
+                continue;
+            if (zip_entry_name($zip_entry) != "word/document.xml")
+                continue;
+            $content .= zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
+            zip_entry_close($zip_entry);
+        }
+        // end while
+        zip_close($zip);
+        //echo $content;
+        //echo "<hr>";
+        //file_put_contents('1.xml', $content);
+        $content = str_replace('</w:r></w:p></w:tc><w:tc>', " ", $content);
+        $content = str_replace('</w:r></w:p>', "\r\n", $content);
+        $striped_content = strip_tags($content);
+        return $striped_content;
+    }
+
 	private function _deleteContent($content_id = 0) {
 		$result = true;
 		try {
@@ -439,25 +467,108 @@ class ContentsController extends ControllerBase {
      * @param content_id
      */
 
-    public function showAction($content_id = 0) {
+    public function showAction($content_id = 0)
+    {
+        $auth = $this->session->get('auth');
+        $userId = $auth['id'];
+        $userName = $auth['name'];
         try {
             $content = Contents::findFirst($content_id);
+
             if ($content) {
-                $user = Users::findFirst("user_id = " . $content->owner_id);
-                $filePath = $content->path;
-                if (file_exists($filePath)) {
-                    header('Content-Description: File Transfer');
-                    header('Content-Type: ' . $content->file_type);
-                    header('Content-Disposition: inline; filename="' . basename($content->information) . '"');
-                    header('Content-Transfer-Encoding: binary');
-                    header('Expires: 0');
-                    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-                    header('Pragma: public');
-                    header('Content-Length: ' . filesize($filePath));
-                    ob_clean();
-                    flush();
-                    readfile($filePath);
-                    exit();
+                if ($content->content_extension == 'docx') {
+                    $filePath = $content->path;
+                    if (file_exists($filePath)) {
+                        $content = $this->read_file_docx($filePath);
+                        if ($content !== false) {
+                            echo '<div style="width: 90%; background-color: #ffffff">';
+                            echo nl2br($content);
+                            echo '</div>';
+                        } else {
+                            echo 'Couldn\'t the file. Please check that file.';
+                        }
+                    }
+                } elseif ($content->content_extension == 'doc') {
+                    $DocumentPath = $content->path;
+                    $word = new COM("word.application") or die("Unable to instantiate application object");
+                    $wordDocument = new COM("word.document") or die("Unable to instantiate document object");
+                    $word->Visible = 0;
+                    $wordDocument = $word->Documents->Open($DocumentPath);
+                    $HTMLPath = substr_replace($DocumentPath, 'html', -3, 3);
+                    $wordDocument->SaveAs($HTMLPath, 3);
+                    $wordDocument = null;
+                    $word->Quit();
+                    $word = null;
+                    echo '<div style="width: 90%; background-color: #ffffff">';
+                    echo readfile($HTMLPath);
+                    echo '</div>';
+                    unlink($HTMLPath);
+                } elseif ($content->content_extension == 'xlsx' || $content->content_extension == 'xls') {
+                    $filePath = $content->path;
+                    include 'Classes/PHPExcel/IOFactory.php';
+
+                    $inputFileName = $filePath;
+
+                    //  Read your Excel workbook
+                    try {
+                        $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+                        $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+                        $objPHPExcel = $objReader->load($inputFileName);
+                    } catch (Exception $e) {
+                        die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
+                            . '": ' . $e->getMessage());
+                    }
+
+                    //  Get worksheet dimensions
+                    $sheet = $objPHPExcel->getSheet(0);
+                    $highestRow = $sheet->getHighestRow();
+                    $highestColumn = $sheet->getHighestColumn();
+
+                    echo '<div class="table-responsive">';
+                    echo '<table class="table table-blue table-bordered table-hover">';
+                    echo '<thead>';
+                    $row = 1;
+                    $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
+                        NULL, TRUE, FALSE);
+                    echo '<tr>';
+                    foreach($rowData[0] as $k=>$v) {
+                        ?>
+                        <th><?php echo $v ?></th>
+                    <?php
+                    }
+                    echo '</tr>';
+                    echo '</thead>';
+                    echo '<tbody>';
+                    for ($row = 2; $row <= $highestRow; $row++) {
+                        $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
+                            NULL, TRUE, FALSE);
+                        echo '<tr>';
+                        foreach($rowData[0] as $k=>$v) {
+                            ?>
+                            <td><?php echo $v ?></td>
+                        <?php
+                        }
+                        echo '</tr>';
+                    }
+                    echo '</tbody>';
+                    echo '</table>';
+                    echo '</div>';
+                } else {
+                    $filePath = $content->path;
+                    if (file_exists($filePath)) {
+                        header('Content-Description: File Transfer');
+                        header('Content-Type: ' . $content->file_type);
+                        header('Content-Disposition: inline; filename="' . basename($content->information) . '"');
+                        header('Content-Transfer-Encoding: binary');
+                        header('Expires: 0');
+                        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                        header('Pragma: public');
+                        header('Content-Length: ' . filesize($filePath));
+                        ob_clean();
+                        flush();
+                        readfile($filePath);
+                        exit();
+                    }
                 }
             } else {
                 $this->flash->error("Content was not found");
